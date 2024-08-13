@@ -24,7 +24,7 @@ class CalculadoraDeImpuestos:
         total_costos_deducibles = self.calcular_total_costos_deducibles()
         base_gravable = total_ingresos_gravados - total_costos_deducibles
         valor_impuesto = base_gravable * 0.19  # Supongamos una tasa de impuesto del 19%
-        return valor_impuesto
+        return valor_impuesto - self.retenciones_fuente
 
 # Ejemplo de uso
 calculadora = CalculadoraDeImpuestos(
