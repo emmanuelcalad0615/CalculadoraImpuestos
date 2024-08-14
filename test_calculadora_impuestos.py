@@ -4,7 +4,7 @@ from calculadora_impuestos import CalculadoraDeImpuestos
 class TestCalculadoraDeImpuestos(unittest.TestCase):
 
     def setUp(self):
-        self.calculadora = CalculadoraDeImpuestos(
+        
 
             ingresos_laborales=50000000,
             otros_ingresos=10000000,
@@ -14,10 +14,13 @@ class TestCalculadoraDeImpuestos(unittest.TestCase):
             pagos_creditos_hipotecarios=2000000,
             donaciones=1000000,
             gastos_educacion=500000
-        )
+
+            resultado = CalculadoraDeImpuestos(ingresos_laborales, otros_ingresos, retenciones_fuente, pagos_seguridad_social, aportes_pension, pagos_creditos_hipotecarios, donaciones, gastos_educacion)
+            self.assertEqual(resultado)
+
+        
 
     def testCasoNormal1(self):
-        self.calculadora = CalculadoraDeImpuestos(
             #Ingreso mensual medio con algunos ingresos adicionales
 
 
@@ -29,10 +32,14 @@ class TestCalculadoraDeImpuestos(unittest.TestCase):
             pagos_creditos_hipotecarios = 300000,
             donaciones = 150000,
             gastos_educacion = 200000
-        )
+
+            resultado = CalculadoraDeImpuestos(ingresos_laborales, otros_ingresos, retenciones_fuente, pagos_seguridad_social, aportes_pension, pagos_creditos_hipotecarios, donaciones, gastos_educacion)
+            self.assertEqual(resultado)
+
+        
 
     def testCasoNormal2(self):
-        self.calculadora = CalculadoraDeImpuestos(
+        
             #Ingreso para un trabajador con ingresos adicionales
 
             ingresos_laborales = 20000000,  # Aproximadamente 17 salarios mínimos
@@ -44,10 +51,11 @@ class TestCalculadoraDeImpuestos(unittest.TestCase):
             donaciones = 200000,
             gastos_educacion = 300000
 
-        )
+            resultado = CalculadoraDeImpuestos(ingresos_laborales, otros_ingresos, retenciones_fuente, pagos_seguridad_social, aportes_pension, pagos_creditos_hipotecarios, donaciones, gastos_educacion)
+            self.assertEqual(resultado)
 
     def testCasoNormal3(self):
-        self.calculadora = CalculadoraDeImpuestos(
+        
             #Ingreso para un trabajador con salario alto
 
             ingresos_laborales = 25000000,  # Aproximadamente 22 salarios mínimos
@@ -59,10 +67,11 @@ class TestCalculadoraDeImpuestos(unittest.TestCase):
             donaciones = 300000,
             gastos_educacion = 400000
 
-        )
+            resultado = CalculadoraDeImpuestos(ingresos_laborales, otros_ingresos, retenciones_fuente, pagos_seguridad_social, aportes_pension, pagos_creditos_hipotecarios, donaciones, gastos_educacion)
+            self.assertEqual(resultado)
 
     def testCasoNormal4(self):
-        self.calculadora =  CalculadoraDeImpuestos(
+       
             #Ingreso para una persona con salario medio y algunos ingresos extras
 
             ingresos_laborales = 16000000,  # Aproximadamente 14 salarios mínimos
@@ -75,10 +84,11 @@ class TestCalculadoraDeImpuestos(unittest.TestCase):
             gastos_educacion = 250000
 
 
-        )
+            resultado = CalculadoraDeImpuestos(ingresos_laborales, otros_ingresos, retenciones_fuente, pagos_seguridad_social, aportes_pension, pagos_creditos_hipotecarios, donaciones, gastos_educacion)
+            self.assertEqual(resultado)
 
     def testCasoNormal5(self):
-        self.calculadora =  CalculadoraDeImpuestos(
+        
            # Ingreso bajo con gastos de educación moderados
 
             ingresos_laborales = 12000000,  # Aproximadamente 10 salarios mínimos
@@ -90,11 +100,12 @@ class TestCalculadoraDeImpuestos(unittest.TestCase):
             donaciones = 100000,
             gastos_educacion = 150000
 
-
-        )
+            resultado = CalculadoraDeImpuestos(ingresos_laborales, otros_ingresos, retenciones_fuente, pagos_seguridad_social, aportes_pension, pagos_creditos_hipotecarios, donaciones, gastos_educacion)
+            self.assertEqual(resultado)
+        
 
     def testCasoNormal6(self):
-        self.calculadora =  CalculadoraDeImpuestos(
+        
             #Ingreso promedio con gastos diversos
 
             ingresos_laborales = 20000000,  # Aproximadamente 17 salarios mínimos
@@ -107,10 +118,11 @@ class TestCalculadoraDeImpuestos(unittest.TestCase):
             gastos_educacion = 250000,
 
 
-       )
-        
+            resultado = CalculadoraDeImpuestos(ingresos_laborales, otros_ingresos, retenciones_fuente, pagos_seguridad_social, aportes_pension, pagos_creditos_hipotecarios, donaciones, gastos_educacion)
+            self.assertEqual(resultado)
+            
     def testCasoExtra1(self):
-        self.calculadora =  CalculadoraDeImpuestos(
+        
             #Altos gastos en comparación con sus ingresos
             
             ingresos_laborales = 20000000,  # Aproximadamente 17 salarios mínimos
@@ -122,11 +134,14 @@ class TestCalculadoraDeImpuestos(unittest.TestCase):
             donaciones = 1000000,
             gastos_educacion = 1000000
 
+            resultado = CalculadoraDeImpuestos(ingresos_laborales, otros_ingresos, retenciones_fuente, pagos_seguridad_social, aportes_pension, pagos_creditos_hipotecarios, donaciones, gastos_educacion)
+            self.assertEqual(resultado)
 
-        )
+
+        
 
     def testCasoExtra2(self):
-        self.calculadora = CalculadoraDeImpuestos(
+        
             #Ingresos y gastos altos en donaciones
 
             ingresos_laborales = 25000000,  # Aproximadamente 22 salarios mínimos
@@ -139,10 +154,11 @@ class TestCalculadoraDeImpuestos(unittest.TestCase):
             gastos_educacion = 400000
 
 
-        )
+            resultado = CalculadoraDeImpuestos(ingresos_laborales, otros_ingresos, retenciones_fuente, pagos_seguridad_social, aportes_pension, pagos_creditos_hipotecarios, donaciones, gastos_educacion)
+            self.assertEqual(resultado)
 
     def testCasoExtra3(self):
-        self.calculadora = CalculadoraDeImpuestos(
+       
             #Grandes ingresos con gastos elevados en educación
             
             ingresos_laborales = 30000000,  # Aproximadamente 26 salarios mínimos
@@ -155,10 +171,11 @@ class TestCalculadoraDeImpuestos(unittest.TestCase):
             gastos_educacion = 3000000  # Muy alto en comparación con otros gastos
 
 
-        )
+            resultado = CalculadoraDeImpuestos(ingresos_laborales, otros_ingresos, retenciones_fuente, pagos_seguridad_social, aportes_pension, pagos_creditos_hipotecarios, donaciones, gastos_educacion)
+            self.assertEqual(resultado)
 
     def testCasoExtra4(self):
-        self.calculadora = CalculadoraDeImpuestos(
+        
             #Ingreso bajo con gastos muy altos en seguridad social
 
             ingresos_laborales = 14000000,  # Aproximadamente 12 salarios mínimos
@@ -171,10 +188,11 @@ class TestCalculadoraDeImpuestos(unittest.TestCase):
             gastos_educacion = 200000
 
 
-        )
+            resultado = CalculadoraDeImpuestos(ingresos_laborales, otros_ingresos, retenciones_fuente, pagos_seguridad_social, aportes_pension, pagos_creditos_hipotecarios, donaciones, gastos_educacion)
+            self.assertEqual(resultado)
 
     def testCasoExtra5(self):
-        self.calculadora = CalculadoraDeImpuestos(
+        
             #Ingresos con alta cantidad de pagos por créditos hipotecarios
 
             ingresos_laborales = 18000000,  # Aproximadamente 15 salarios mínimos
@@ -187,10 +205,11 @@ class TestCalculadoraDeImpuestos(unittest.TestCase):
             gastos_educacion = 300000
 
 
-        )
+            resultado = CalculadoraDeImpuestos(ingresos_laborales, otros_ingresos, retenciones_fuente, pagos_seguridad_social, aportes_pension, pagos_creditos_hipotecarios, donaciones, gastos_educacion)
+            self.assertEqual(resultado)
     
     def testCasoExtra6(self):
-        self.calculadora = CalculadoraDeImpuestos(
+        
             #Ingreso medio con grandes donaciones y gastos de educación
            
             ingresos_laborales = 16000000,  # Aproximadamente 14 salarios mínimos
@@ -203,7 +222,8 @@ class TestCalculadoraDeImpuestos(unittest.TestCase):
             gastos_educacion = 500000,
 
 
-        )
+            resultado = CalculadoraDeImpuestos(ingresos_laborales, otros_ingresos, retenciones_fuente, pagos_seguridad_social, aportes_pension, pagos_creditos_hipotecarios, donaciones, gastos_educacion)
+            self.assertEqual(resultado)
 
     def testCasoError1(self):
         self.calculadora = CalculadoraDeImpuestos(
