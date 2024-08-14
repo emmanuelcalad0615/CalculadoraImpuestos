@@ -25,6 +25,27 @@ class CalculadoraDeImpuestos:
         base_gravable = total_ingresos_gravados - total_costos_deducibles
         valor_impuesto = base_gravable * 0.19  # Supongamos una tasa de impuesto del 19%
         return valor_impuesto - self.retenciones_fuente
+    
+class SeguridadInvalida(Exception):
+        pass
+
+class RetencionesInvalidas(Exception):
+    pass
+
+class ValoresNegativos(Exception):
+    pass
+
+class DonacionesExcesivas(Exception):
+    pass
+
+class TipoDatoIncorrecto(Exception):
+    pass
+
+class IngresoLaboralInvalido(Exception):
+    pass
+
+class SeguridadSocialInvalida(Exception):
+    pass
 
 # Ejemplo de uso
 calculadora = CalculadoraDeImpuestos(
