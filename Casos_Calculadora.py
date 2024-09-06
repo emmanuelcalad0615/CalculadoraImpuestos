@@ -1,6 +1,6 @@
 import unittest
-from Calculadora_tests import CalculadoraDeImpuestos
-from Exceptions import(
+from tests.Calculadora_tests import CalculadoraDeImpuestos
+from tests.Exceptions import(
     NegativeValuesError,
     LaborIncomeLessThanZero,
     SocialSecurityPaymentsGreaterThanIncome,

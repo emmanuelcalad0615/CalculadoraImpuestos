@@ -1,55 +1,42 @@
-def CalcularCouta(labor_income: int, other_income: int, withholding_tax: int, social_security_payments: int, pension_contributions: int, mortgage_payments: int, donations: int, education_expenses: int):
+def CalcularCouta(ingresos_laborales: int, otros_ingresos: int, retenciones_fuente: int, pagos_seguridad_social: int, aportes_pension: int, pagos_creditos_hipotecarios: int, donaciones: int, gastos_educacion: int):
 
-    # Check for negative values
-    if labor_income < 0 or other_income < 0 or withholding_tax < 0 or social_security_payments < 0 or pension_contributions < 0 or mortgage_payments < 0 or donations < 0 or education_expenses < 0:
+    if ingresos_laborales < 0 or otros_ingresos < 0 or retenciones_fuente < 0 or pagos_seguridad_social < 0 or aportes_pension < 0 or pagos_creditos_hipotecarios < 0 or donaciones < 0 or gastos_educacion < 0:
         raise Exception("Los valores no pueden ser negativos.")
 
-    # Validate that labor income is positive
-    if labor_income <= 0:
+    if ingresos_laborales <= 0:
         raise Exception("Los ingresos laborales deben ser mayores que cero.")
 
-    # Ensure social security payments do not exceed labor income
-    if social_security_payments > labor_income:
+    if pagos_seguridad_social > ingresos_laborales:
         raise Exception("Los pagos de seguridad social no pueden exceder los ingresos laborales.")
 
-     # Ensure pension contributions do not exceed labor income
-    if pension_contributions > labor_income:
+    if aportes_pension > ingresos_laborales:
         raise Exception("Los aportes a pensión no pueden exceder los ingresos laborales.")
 
-    # Ensure mortgage payments do not exceed labor income
-    if mortgage_payments > labor_income:
+    if pagos_creditos_hipotecarios > ingresos_laborales:
         raise Exception("Los pagos por créditos hipotecarios no pueden exceder los ingresos laborales.")
 
-    # Ensure donations do not exceed labor income
-    if donations > labor_income:
+    if donaciones > ingresos_laborales:
         raise Exception("Las donaciones no pueden exceder los ingresos laborales.")
 
-    # Ensure education expenses do not exceed labor income
-    if education_expenses > labor_income:
+    if gastos_educacion > ingresos_laborales:
         raise Exception("Los gastos de educación no pueden exceder los ingresos laborales.")
 
-    # Ensure education expenses do not exceed the sum of labor and other income
-    if education_expenses > labor_income + other_income:
+    if gastos_educacion > ingresos_laborales + otros_ingresos:
         raise Exception("Los gastos de educación no pueden exceder la suma de ingresos laborales y otros ingresos.")
 
-    # Ensure withholding tax is not negative
-    if withholding_tax < 0:
+    if retenciones_fuente < 0:
         raise Exception("Las retenciones de fuente no pueden ser negativas.")
 
-     # Ensure social security payments are not zero
-    if social_security_payments == 0:
+    if pagos_seguridad_social == 0:
         raise Exception("Los pagos de seguridad social no pueden ser cero.")
 
-    # Validate that income is sufficient to cover expenses and deductions
-    if labor_income < education_expenses + other_income + withholding_tax + social_security_payments + pension_contributions + mortgage_payments + donations:
+    if ingresos_laborales < gastos_educacion + otros_ingresos + retenciones_fuente + pagos_seguridad_social + aportes_pension + pagos_creditos_hipotecarios + donaciones:
         raise Exception("Los ingresos no son suficientes para cubrir los gastos y deducciones.")
     
-    # Validates if the total tax amount is negative
-    if ((((labor_income + other_income)-(social_security_payments + pension_contributions + mortgage_payments + donations + education_expenses))*0.19) - withholding_tax) < 0:
+    if ((((ingresos_laborales + otros_ingresos)-(pagos_seguridad_social + aportes_pension + pagos_creditos_hipotecarios + donaciones + gastos_educacion))*0.19) - retenciones_fuente) < 0:
         raise Exception("Los impuestos son negativos, vuelva a intentar")
     
     else: 
-        # Calculates the total tax amount
-        return ((((labor_income + other_income)-(social_security_payments + pension_contributions + mortgage_payments + donations + education_expenses))*0.19) - withholding_tax)
+        return ((((ingresos_laborales + otros_ingresos)-(pagos_seguridad_social + aportes_pension + pagos_creditos_hipotecarios + donaciones + gastos_educacion))*0.19) - retenciones_fuente)
   
     
