@@ -17,7 +17,8 @@ try:
     print(f"El Valor a pagar es: {result}")
 
 except Exception as el_error:
-    print("Hubo un error")
+    print("Valor ingresado incorrecto")
     print(str(el_error))
+    
 
 
