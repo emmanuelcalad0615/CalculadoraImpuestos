@@ -20,6 +20,8 @@ Archivo principal de la interfaz gráfica del usuario (GUI). Permite la interacc
 
 ##### Calculadora_Console.py: 
 Archivo encargado de la interacción en consola. Solicita al usuario sus ingresos y gastos y calcula los impuestos basados en los valores introducidos.
+
+#### src/Logi/
 ##### Calculadora.py:
  Contiene la lógica principal de cálculo de impuestos, con las fórmulas y reglas necesarias.
 

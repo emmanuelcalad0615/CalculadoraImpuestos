@@ -1,4 +1,8 @@
-import Calculadora as Calculadora
+import sys
+import os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+import Logi.Calculadora as Calculadora
 
 try:
     # User inputs for income and deductions

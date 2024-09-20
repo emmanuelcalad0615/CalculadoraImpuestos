@@ -11,7 +11,7 @@ import os
 
 root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(root_path)
-from src.Console.Calculadora import CalcularCouta
+from src.Logi.Calculadora import CalcularCouta
 
 class CalculadoraApp(App):
     def build(self):
