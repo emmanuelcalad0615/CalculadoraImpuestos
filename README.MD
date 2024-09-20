@@ -49,7 +49,7 @@ Define las excepciones personalizadas utilizadas en el sistema para gestionar er
 
 La carpeta GUI contiene la implementación de la interfaz gráfica del proyecto. El archivo principal es Calculadora_gui.py, donde se encuentran los elementos visuales que permiten al usuario interactuar con la calculadora de una manera más intuitiva y amigable.
 
-Este archivo utiliza bibliotecas gráficas (como Tkinter o cualquier otra biblioteca de interfaz de usuario) para crear la ventana, botones y campos de entrada necesarios para ingresar los datos del usuario (ingresos y gastos), y muestra el resultado del cálculo en pantalla.
+Este archivo utiliza bibliotecas gráficas de Kivy para crear la ventana, botones y campos de entrada necesarios para ingresar los datos del usuario (ingresos y gastos), y muestra el resultado del cálculo en pantalla.
 
 #### Desde consola: 
 
