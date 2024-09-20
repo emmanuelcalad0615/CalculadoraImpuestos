@@ -10,49 +10,28 @@ Este proyecto es una Calculadora de Impuestos que calcula el monto del impuesto 
 -Samuel Villa Carmona
 
 ## Estructura del Proyecto
+### Carpetas Principales:
+#### GUI/
 
-CalculadoraImpuestos/
-│
-├── GUI/
-│   └── Calculadora_gui.py
-│
-├── src/
-│   └── Console/
-│       ├── Calculadora_Console.py
-│       └── Calculadora.py
-│
-├── test/
-│   ├── Calculadora_tests.py
-│   ├── Casos_Calculadora.py
-│   └── Exceptions.py
-└── README.md
+##### Calculadora_gui.py: 
+Archivo principal de la interfaz gráfica del usuario (GUI). Permite la interacción visual con el usuario para ingresar datos y mostrar resultados.
 
-### src/Console
+#### src/Console/
 
-#### src/Console/Calculadora_Console.py:
-Este archivo se encarga de la interfaz de usuario en consola. Permite que el usuario introduzca sus ingresos y gastos, y calcula el impuesto basándose en los valores ingresados. Si se ingresan datos incorrectos, se muestran mensajes de error.
-
-#### src/Console/Calculadora.py:
-Este archivo contiene toda la lógica de cálculo de impuestos. Implementa fórmulas y condicionales necesarios para determinar el monto del impuesto a pagar en función de los datos introducidos por el usuario.
-
-### GUI
-
-#### GUI/Calculadora_gui.py:
-Este archivo corresponde a la interfaz gráfica del proyecto. Proporciona una interfaz de usuario más visual e interactiva, donde los usuarios pueden ingresar sus ingresos y gastos a través de botones, campos de texto, y posiblemente otras características gráficas. La lógica principal del cálculo de impuestos sigue siendo manejada por el archivo Calculadora.py que se encuentra en src/Console.
-
-En este archivo, se incluyen las importaciones necesarias para interactuar con la lógica del proyecto que está ubicada en otras carpetas. Es crucial asegurarse de que los módulos y archivos se importen correctamente para que la interfaz gráfica funcione.
-
-### test
+##### Calculadora_Console.py: 
+Archivo encargado de la interacción en consola. Solicita al usuario sus ingresos y gastos y calcula los impuestos basados en los valores introducidos.
+##### Calculadora.py:
+ Contiene la lógica principal de cálculo de impuestos, con las fórmulas y reglas necesarias.
 
 
-#### Calculadora_tests.py
-Este archivo contiene pruebas unitarias y la lógica de verificación de los cálculos realizados por Calculadora.py.
+#### test/
 
-#### Casos_Calculadora.py
- Contiene casos de prueba reales divididos en casos normales, extraordinarios y casos de error, ejecutando las funciones desde Calculadora_tests.py.
-
-#### Exceptions.py
-Define excepciones personalizadas para gestionar errores en el ingreso de datos por parte del usuario.
+##### Calculadora_tests.py: 
+Archivo que contiene las pruebas unitarias de los cálculos de impuestos. Verifica el correcto funcionamiento de las fórmulas y lógicas definidas.
+##### Casos_Calculadora.py: 
+Incluye diferentes casos de prueba, como casos normales, extraordinarios y de error, para verificar el comportamiento del sistema.
+##### Exceptions.py: 
+Define las excepciones personalizadas utilizadas en el sistema para gestionar errores relacionados con los datos introducidos.
 
 
 ## Como ejectutar?
