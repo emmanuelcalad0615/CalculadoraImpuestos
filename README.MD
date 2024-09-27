@@ -53,12 +53,14 @@ Este archivo utiliza bibliotecas gráficas de Kivy para crear la ventana, botone
 
 #### Desde consola: 
 
-Para abrir la interfaz gráfica desde la consola, sigue estos pasos:
+##### Abrir la terminal:
+Presiona Windows + R, escribe cmd, y presiona Enter.
+Esto abrirá la terminal (símbolo del sistema).
 
--Navega a la carpeta raíz del proyecto (CalculadoraImpuestos).
+-En la terminal, usa el comando cd (change directory) para ir a la ubicación de tu archivo Python. Según la ruta que diste (CalculadoraImpuestos/src/GUI/Calculadora_gui.py), debes ingresar a las carpetas de la siguiente forma: cd C:\ruta\a\tu\proyecto\CalculadoraImpuestos\src\GUI ó cd C:\Users\TuUsuario\Desktop\CalculadoraImpuestos\src\GUI
 
--Ejecuta el archivo Calculadora_gui.py desde la consola:
-##### python src/GUI/Calculadora_gui.py
+-Ejecuta el siguiente comando para instalar Kivy (La interfaz del Usuario): pip install kivy
 
-Esto abrirá la interfaz gráfica de la calculadora, donde podrás ingresar tus ingresos y gastos de manera interactiva.
+-Una vez que estés dentro de la carpeta GUI, ejecuta el archivo Calculadora_gui.py con el siguiente comando: python Calculadora_gui.py
+
 
