@@ -11,7 +11,7 @@ Este proyecto es una Calculadora de Impuestos que calcula el monto del impuesto 
 
 ## Estructura del Proyecto
 ### Carpetas Principales:
-#### GUI/
+#### src/GUI/
 
 ##### Calculadora_gui.py: 
 Archivo principal de la interfaz gráfica del usuario (GUI). Permite la interacción visual con el usuario para ingresar datos y mostrar resultados.
@@ -47,7 +47,7 @@ Define las excepciones personalizadas utilizadas en el sistema para gestionar er
 
 ### Interfaz Grafica: 
 
-La carpeta GUI contiene la implementación de la interfaz gráfica del proyecto. El archivo principal es Calculadora_gui.py, donde se encuentran los elementos visuales que permiten al usuario interactuar con la calculadora de una manera más intuitiva y amigable.
+La carpeta src/GUI contiene la implementación de la interfaz gráfica del proyecto. El archivo principal es Calculadora_gui.py, donde se encuentran los elementos visuales que permiten al usuario interactuar con la calculadora de una manera más intuitiva y amigable.
 
 Este archivo utiliza bibliotecas gráficas de Kivy para crear la ventana, botones y campos de entrada necesarios para ingresar los datos del usuario (ingresos y gastos), y muestra el resultado del cálculo en pantalla.
 
@@ -58,7 +58,7 @@ Para abrir la interfaz gráfica desde la consola, sigue estos pasos:
 -Navega a la carpeta raíz del proyecto (CalculadoraImpuestos).
 
 -Ejecuta el archivo Calculadora_gui.py desde la consola:
-##### python GUI/Calculadora_gui.py
+##### python src/GUI/Calculadora_gui.py
 
 Esto abrirá la interfaz gráfica de la calculadora, donde podrás ingresar tus ingresos y gastos de manera interactiva.
 
