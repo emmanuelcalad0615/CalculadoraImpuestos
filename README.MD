@@ -57,7 +57,7 @@ Este archivo utiliza bibliotecas gráficas de Kivy para crear la ventana, botone
 Presiona Windows + R, escribe cmd, y presiona Enter.
 Esto abrirá la terminal (símbolo del sistema).
 
--En la terminal, usa el comando cd (change directory) para ir a la ubicación de tu archivo Python. Según la ruta que diste (CalculadoraImpuestos/src/GUI/Calculadora_gui.py), debes ingresar a las carpetas de la siguiente forma: cd C:\ruta\a\tu\proyecto\CalculadoraImpuestos\src\GUI ó cd C:\Users\TuUsuario\Desktop\CalculadoraImpuestos\src\GUI
+-En la terminal, usa el comando cd (change directory) para ir a la ubicación de tu archivo Python. Debes ingresar a las carpetas de la siguiente forma: "cd C:\ruta\a\tu\proyecto\CalculadoraImpuestos\src\GUI" ó "cd C:\Users\TuUsuario\Desktop\CalculadoraImpuestos\src\GUI"
 
 -Ejecuta el siguiente comando para instalar Kivy (La interfaz del Usuario): pip install kivy
 
