@@ -1,11 +1,52 @@
 class CalculoException(Exception):
     def _init_(self, mensaje):
         super()._init_(mensaje)
-class NegativeTaxes:
+class NegativeTaxes(Exception):
+    pass
+class BelowLimits(Exception):
     pass
 
 class Person:
     def __init__(self, laboral_income: int, other_income: int, withholding_source: int, social_security_payments: int, pension_contributions: int, mortgage_payments: int, donations: int, educational_expenses:int ) -> None:
+        # Check for negative values
+        if laboral_income < 0 or other_income < 0 or withholding_source < 0 or social_security_payments < 0 or pension_contributions < 0 or mortgage_payments < 0 or donations < 0 or educational_expenses < 0:
+            raise Exception("Los valores no pueden ser negativos.")
+
+        # Validate that labor income is positive
+        if laboral_income <= 0:
+            raise Exception("Los ingresos laborales deben ser mayores que cero.")
+
+        # Ensure social security payments are not zero
+        if social_security_payments == 0:
+            raise Exception("Los pagos de seguridad social no pueden ser cero.")
+        
+         # Check that social security payments do not exceed labor income
+        if social_security_payments > laboral_income:
+            raise Exception("Los pagos de seguridad social no pueden exceder los ingresos laborales.")
+
+        # Check that pension contributions do not exceed labor income
+        if pension_contributions > laboral_income:
+            raise Exception("Los aportes a pensión no pueden exceder los ingresos laborales.")
+
+        # Check that mortgage payments do not exceed labor income
+        if mortgage_payments > laboral_income:
+            raise Exception("Los pagos por créditos hipotecarios no pueden exceder los ingresos laborales.")
+
+        # Check that donations do not exceed labor income
+        if donations > laboral_income:
+            raise Exception("Las donaciones no pueden exceder los ingresos laborales.")
+
+        # Check that education expenses do not exceed the sum of labor and other income
+        if educational_expenses > laboral_income + other_income:
+            raise Exception("Los gastos de educación no pueden exceder la suma de ingresos laborales y otros ingresos.")
+
+         # Ensure withholding tax is not negative
+        if withholding_source < 0:
+            raise Exception("Las retenciones de fuente no pueden ser negativas.")
+
+        # Validate that income is sufficient to cover expenses and deductions
+        if laboral_income < educational_expenses + social_security_payments + pension_contributions + mortgage_payments + donations:
+            raise Exception("Los ingresos no son suficientes para cubrir los gastos y deducciones.")
         self.laboral_income: int = laboral_income
         self.other_income: int = other_income
         self.withholding_source: int = withholding_source
@@ -14,6 +55,7 @@ class Person:
         self.mortgage_payments: int = mortgage_payments
         self.donations: int = donations
         self.educational_expenses: int = educational_expenses
+
 
 class IncomeDeclaration:
     def __init__(self, person: Person) -> None:
@@ -62,12 +104,14 @@ class IncomeDeclaration:
         """
 
         total_taxable_income = self.calcular_total_ingresos_gravados()
+        if total_taxable_income < 51000000:
+            raise BelowLimits("Sus ingresos no superan los 51000000, no debe declar renta")
         total_deductible_costs = self.calcular_total_costos_deducibles()
         taxable_base = total_taxable_income - total_deductible_costs
-        tax_amount = taxable_base * 0.19   # Assuming a 19% tax rate
+        tax_amount = taxable_base * 0.35   # Assuming a 35% tax rate
         if tax_amount < 0:
             raise NegativeTaxes("El valor del impuesto no puede ser negativo.")
-        return tax_amount - self.person.withholding_source  
+        return tax_amount - self.person.withholding_source 
           
 person = Person(
     laboral_income=50000000,
