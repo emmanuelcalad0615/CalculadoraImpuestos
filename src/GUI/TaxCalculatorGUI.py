@@ -1,99 +1,177 @@
 from kivy.app import App
-from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
-from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.screenmanager import Screen, ScreenManager
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.textinput import TextInput
 from kivy.uix.scrollview import ScrollView
-from kivy.graphics import Color, Rectangle
+from kivy.uix.image import Image
+from kivy.graphics import Color, RoundedRectangle
+
 import sys
-import os
+sys.path.append("src")
+from TaxCalculator.IncomeDeclaration import Person, IncomeDeclaration
 
-root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-sys.path.append(root_path)
-from Logi.Calculadora import CalcularCouta
+class MainScreen(Screen):
+    def __init__(self, **kwargs):
+        super(MainScreen, self).__init__(**kwargs)
+        contenedor = BoxLayout(orientation="vertical", padding=50, spacing=20)
+        
+        with contenedor.canvas.before:
+            Color(1, 1, 1)
+            self.rect = RoundedRectangle(size=contenedor.size, pos=contenedor.pos)
+            contenedor.bind(size=self._update_rect, pos=self._update_rect)
 
-class CalculadoraApp(App):
+        welcome_label = Label(text="Welcome to the Tax Calculator", font_size='24sp', halign="center", bold=True, color=(0, 0, 0))
+        contenedor.add_widget(welcome_label)
+
+        #img = Image(source='TaxCalculator.png')
+        #contenedor.add_widget(img)
+
+        instructions_label = Label(text="Please enter all fields correctly to calculate your Tax. \n \n If you don't have [b]other incomes[/b] or [b]donations[/b], let it empty or put zero.", font_size='20sp', halign="center", color=(0, 0, 0), markup=True)
+        contenedor.add_widget(instructions_label)
+
+
+        button = Button(text='Go to Calculator', size=(200, 50), size_hint_y=None, background_color=(0.37, 0.75, 0.96), background_normal='', color=(1, 1, 1), font_size='20sp', bold=True)
+        button.bind(on_press=self.change_screen)
+        contenedor.add_widget(button)
+        
+        self.add_widget(contenedor)
+
+
+    def _update_rect(self, instance, value):
+        self.rect.size = instance.size
+        self.rect.pos = instance.pos
+
+    def change_screen(self, instance):
+        self.manager.current = "calculator_screen"
+
+
+class CalculadoraScreen(Screen):
+    def __init__(self, **kwargs):
+        super(CalculadoraScreen, self).__init__(**kwargs)
+        self.build() 
+
     def build(self):
-        """Builds the user interface for the calculator application."""
-        self.scroll_view = ScrollView()
-        self.layout = BoxLayout(orientation='vertical', padding=10, spacing=10, size_hint_y=None)
-        self.layout.bind(minimum_height=self.layout.setter('height'))
+        layout_back = BoxLayout(orientation='horizontal')  # Layout principal para toda la pantalla
 
-        # Change background color
-        with self.layout.canvas.before:
-            Color(0, 0, 0)  # Background color
-            self.rect = Rectangle(size=self.layout.size, pos=self.layout.pos)
+        # Botón de regreso en la parte izquierda
+        back_button = Button(text="Back", size_hint=(0.1, 1), color=(1, 1, 1), font_size='20sp', bold=True, background_color=(0.37, 0.75, 0.96), background_normal='')
+        back_button.bind(on_press=self.go_back)
+        layout_back.add_widget(back_button)
 
-        self.layout.bind(size=self._update_rect, pos=self._update_rect)
+        scroll_view = ScrollView(size_hint=(0.9, 1), bar_width=5, bar_color=(1, 1, 1, 1))
+        scroll_view.effect_cls = "ScrollEffect"
+        
+        contenedor = GridLayout(cols=2, padding=80, spacing=20, size_hint_y=None)
+        contenedor.bind(minimum_height=contenedor.setter('height'))
 
-        # Styles
-        label_color = (1, 1, 1)  # White
-        input_color = (0.95, 0.95, 0.95, 1)  # Light color for inputs
-        button_color = (0.5, 0.5, 0.5)  # Button color
+        with contenedor.canvas.before:
+            Color(1, 1, 1)
+            self.rect = RoundedRectangle(size=contenedor.size, pos=contenedor.pos)
+            contenedor.bind(size=self._update_rect, pos=self._update_rect)
 
-        # Inputs
+        title_label = Label(text="Tax Calculator", font_size='24sp', color=(0, 0, 0, 1), size_hint_y=None, height=50, bold=True)
+        contenedor.add_widget(Label(text=""))
+        contenedor.add_widget(title_label)
+
         self.inputs = {}
         fields = [
-            "Ingresos laborales",
-            "Otros ingresos",
-            "Retenciones de fuente",
-            "Pagos a Seguridad Social",
-            "Aportes a pensión",
-            "Pagos hipotecarios",
-            "Donaciones",
-            "Gastos educativos"
+            "Labor Income", 
+            "Other Incomes", 
+            "Withholding sources",
+            "Social Security Payments", 
+            "Pension Contributions",
+            "Mortgage Payments", 
+            "Donations", 
+            "Educational Expenses"
         ]
 
         for field in fields:
-            label = Label(text=field, size_hint_y=None, height=40, color=label_color)
-            self.layout.add_widget(label)
-            input_field = TextInput(
-                multiline=False,
-                size_hint_y=None,
-                height=40,
-                background_color=input_color,
-                hint_text="Ingrese correctamente todos los campos: " + field.lower(),
-                hint_text_color=(0,0,0)  
-            )
-            self.layout.add_widget(input_field)
+            label = Label(text=field, size_hint_y=None, height=40, color=(0, 0, 0, 1), halign="left", valign="middle", font_size='20', bold=True)
+            contenedor.add_widget(label)
+
+            input_field = TextInput(multiline=False, size_hint_y=None, height=40, hint_text="$",font_size='20sp')
+            contenedor.add_widget(input_field)
             self.inputs[field] = input_field
 
-        # Calculate button
-        self.calc_button = Button(text='Calcular', size_hint_y=None, height=50)
-        self.calc_button.bind(on_press=self.calculate)
-        self.calc_button.background_color = button_color
-        self.calc_button.color = (1, 1, 1)  # White text on button
-        self.layout.add_widget(self.calc_button)
+        calculate_button = Button(text='Calculate', size_hint_y=None, height=50, background_color=(0.37, 0.75, 0.96), background_normal='', color=(1, 1, 1), font_size='20sp', bold=True)
+        calculate_button.bind(on_press=self.calculate)
+        contenedor.add_widget(Label(text=""))
+        contenedor.add_widget(calculate_button)
 
-        # Result label
-        self.result_label = Label(text="", size_hint_y=None, height=40, color=(1, 1, 1))
-        self.layout.add_widget(self.result_label)
+        result_label_text = Label(text="Result", bold=True, size_hint_y=None, height=40, color=(0, 0, 0, 1), halign="left", valign="middle", font_size='20sp')
+        contenedor.add_widget(Label(text=""))
+        contenedor.add_widget(result_label_text)
 
-        self.scroll_view.add_widget(self.layout)
-        return self.scroll_view
+        self.result_label = Label(text="", size_hint_y=None, height=30, color=(0, 0, 0, 1), halign="left", valign="middle", font_size='20sp')
+        contenedor.add_widget(Label(text=""))
+        contenedor.add_widget(self.result_label)
+
+        scroll_view.add_widget(contenedor)
+        layout_back.add_widget(scroll_view)
+        
+        self.add_widget(layout_back)
+
 
     def _update_rect(self, instance, value):
-        """Updates the position and size of the background rectangle."""
-        self.rect.pos = instance.pos
         self.rect.size = instance.size
+        self.rect.pos = instance.pos
 
     def calculate(self, instance):
-        """Calculates the tax based on user inputs and displays the result."""
         try:
-            values = {field: int(self.inputs[field].text) for field in self.inputs}
-            result = CalcularCouta(
-                values["Ingresos laborales"],
-                values["Otros ingresos"],
-                values["Retenciones de fuente"],
-                values["Pagos a Seguridad Social"],
-                values["Aportes a pensión"],
-                values["Pagos hipotecarios"],
-                values["Donaciones"],
-                values["Gastos educativos"]
+            inputs = {
+                "Labor Income": "labor_income",
+                "Other Incomes": "other_income",
+                "Withholding sources": "withholding_source",
+                "Social Security Payments": "social_security_payments",
+                "Pension Contributions": "pension_contributions",
+                "Mortgage Payments": "mortgage_payments",
+                "Donations": "donations",
+                "Educational Expenses": "educational_expenses"}
+
+            values = {inputs[field]: int(self.inputs[field].text) if self.inputs[field].text else 0 for field in inputs}
+
+            person = Person(
+                values["labor_income"],
+                values["other_income"],
+                values["withholding_source"],
+                values["social_security_payments"],
+                values["pension_contributions"],
+                values["mortgage_payments"],
+                values["donations"],
+                values["educational_expenses"]
             )
-            self.result_label.text = f"Total a pagar: {result}"
+            
+            declaration = IncomeDeclaration(person)
+            tax_value = declaration.calcular_valor_impuesto()
+            self.result_label.text = f"Total Tax: ${tax_value:,.2f}"
+            print(tax_value)
+            
+            
+
         except Exception as el_error:
-            self.result_label.text = f"Valor Ingresado Erroneo: {str(el_error)}"  # Display error message
+            print("Error............")
+            self.result_label.text = f"¡ERROR! Incorrect Value Entered: \n {str(el_error)}"
+
+    def go_back(self, instance):
+        self.clear_fields()
+        self.manager.current = "main_screen"
+        
+    
+    def clear_fields(self):
+        for field in self.inputs:
+            self.inputs[field].text = ""
+
+class CalculadoraApp(App):
+    def build(self):
+        contenedor = ScreenManager()
+
+        contenedor.add_widget(MainScreen(name="main_screen"))
+        contenedor.add_widget(CalculadoraScreen(name="calculator_screen"))
+
+        return contenedor
 
 if __name__ == '__main__':
-    CalculadoraApp().run()  # Run the application
+    CalculadoraApp().run()
