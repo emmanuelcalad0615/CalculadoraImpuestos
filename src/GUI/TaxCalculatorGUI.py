@@ -11,7 +11,7 @@ from kivy.graphics import Color, RoundedRectangle
 
 import sys
 sys.path.append("src")
-from TaxCalculator.IncomeDeclaration import Person, IncomeDeclaration
+from TaxCalculator.IncomeDeclaration import NaturalPerson, IncomeDeclaration
 
 class MainScreen(Screen):
     def __init__(self, **kwargs):
@@ -133,7 +133,7 @@ class CalculadoraScreen(Screen):
 
             values = {inputs[field]: int(self.inputs[field].text) if self.inputs[field].text else 0 for field in inputs}
 
-            person = Person(
+            person = NaturalPerson(
                 values["labor_income"],
                 values["other_income"],
                 values["withholding_source"],
@@ -152,7 +152,7 @@ class CalculadoraScreen(Screen):
             
 
         except Exception as el_error:
-            print("Error............")
+            print(el_error)
             self.result_label.text = f"¡ERROR! Incorrect Value Entered: \n {str(el_error)}"
 
     def go_back(self, instance):
