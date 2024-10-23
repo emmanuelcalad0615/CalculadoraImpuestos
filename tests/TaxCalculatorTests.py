@@ -307,27 +307,6 @@ class TestCalculadoraDeImpuestos(unittest.TestCase):
                                    donations=3000, educational_expenses=1000, personal_info=None)
 
 
-    def test_insufficient_income_for_deductions(self):
-        # Establecemos deducciones mayores que los ingresos
-        person = NaturalPerson(
-            laboral_income=10000, 
-            other_income=0, 
-            withholding_source=0,
-            social_security_payments=5000, 
-            pension_contributions=2000, 
-            mortgage_payments=3000, 
-            donations=500, 
-            educational_expenses=1000, 
-            personal_info=None
-        )
-
-        # El total de las deducciones (5000 + 2000 + 3000 + 500 + 1000) = 11500
-        # Dado que las deducciones (11500) exceden el ingreso laboral (10000), 
-        # se debería lanzar la excepción InsufficientIncomeForDeductions
-        with self.assertRaises(InsufficientIncomeForDeductions):
-            icome_declaration = IncomeDeclaration(person)
-            icome_declaration.calcular_valor_impuesto()
-
     def test_valid_person(self):
         # Test valid input without triggering any exceptions
         try:

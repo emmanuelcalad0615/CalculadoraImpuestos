@@ -3,7 +3,7 @@ sys.path.append("src")
 from TaxCalculator.IncomeDeclaration import PersonalInfo, IncomeDeclaration, NaturalPerson
 import psycopg2
 from psycopg2 import sql
-import SecretConfig
+from Controller import SecretConfig
 class NotFound(Exception):
     pass
 class PersonalInfoController:
@@ -28,13 +28,24 @@ class PersonalInfoController:
             with open("sql/create-personal_info.sql", "r") as f:
                 sql_script = f.read()
             cursor.execute(sql_script)
-            connection.commit()  # Asegúrate de hacer commit después de la ejecución
+            connection.commit()  
+        except psycopg2.errors.DuplicateTable:
+            pass    
         except Exception as e:
             connection.rollback()
-            print(f"Error creando la tabla: {e}")  # Puedes usar logging en lugar de print
+            print(f"Error creando la tabla: {e}")  
         finally:
-            cursor.close()  # Asegúrate de cerrar el cursor
-            connection.close()  # Y cierra la conexión    
+            cursor.close()  
+            connection.close() 
+    @staticmethod        
+    def BorrarFilas():
+        
+        sql = "delete from usuarios;"
+        conecction, cursor = PersonalInfoController.get_cursor()
+        cursor.execute( sql )
+        sql = "delete from familiares;"
+        cursor.execute( sql )
+        cursor.connection.commit()             
 
     @staticmethod
     def insert_personal_info(personal_info: PersonalInfo):
@@ -131,14 +142,6 @@ class PersonalInfoController:
             cursor.close()
             connection.close()              
             
-#PersonalInfoController.create_table()
-#Crear instancia de PersonalInfo
-personal_info = PersonalInfo(nombre="Juan Perez", id=12345678, ocupacion="Ingeniero", rut=12345678)
-
-# Insertar información personal
-PersonalInfoController.insert_personal_info(personal_info)
-
-print(PersonalInfoController.search_personal_info(12345678))
 
 
 

@@ -3,7 +3,7 @@ sys.path.append("src")
 from TaxCalculator.IncomeDeclaration import PersonalInfo, NaturalPerson, IncomeDeclaration, CalculoException
 import psycopg2
 from psycopg2 import sql
-import SecretConfig
+from Controller import SecretConfig
 class NotFound(Exception):
     pass
 class NaturalPersonController:
@@ -20,6 +20,16 @@ class NaturalPersonController:
         PORT = SecretConfig.PGPORT
         connection = psycopg2.connect(database=DATABASE, user=USER, password=PASSWORD, host=HOST, port=PORT)
         return connection, connection.cursor()
+    
+    @staticmethod
+    def BorrarFilas():
+        
+        sql = "delete from usuarios;"
+        conecction, cursor = NaturalPersonController.get_cursor()
+        cursor.execute( sql )
+        sql = "delete from familiares;"
+        cursor.execute( sql )
+        cursor.connection.commit() 
 
     @staticmethod
     def create_table():
@@ -28,13 +38,15 @@ class NaturalPersonController:
             with open("sql/crate-natural_person.sql", "r") as f:
                 sql_script = f.read()
             cursor.execute(sql_script)
-            connection.commit()  # Asegúrate de hacer commit después de la ejecución
+            connection.commit()  
+        except psycopg2.errors.DuplicateTable:
+            pass    
         except Exception as e:
             connection.rollback()
-            print(f"Error creando la tabla: {e}")  # Puedes usar logging en lugar de print
+            print(f"Error creando la tabla: {e}")  
         finally:
-            cursor.close()  # Asegúrate de cerrar el cursor
-            connection.close()  # Y cierra la conexión    
+            cursor.close()  
+            connection.close()     
 
     @staticmethod
     def insert_natural_person(natural_person: NaturalPerson, personal_info_id: int, personal_info_rut: int):
@@ -164,26 +176,3 @@ class NaturalPersonController:
         finally:
             cursor.close()
             connection.close()                    
-#NaturalPersonController.create_table()                 
-personal_info = PersonalInfo(nombre="Juan Perez", id=12345678, ocupacion="Ingeniero", rut=12345678)
-
-# Insertar información personal
-#PersonalInfoController.insert_personal_info(personal_info)
-
-# Crear instancia de NaturalPerson
-natural_person = NaturalPerson(
-    laboral_income=50000000,
-    other_income=1000000,
-    withholding_source=5000000,
-    social_security_payments=1000000,
-    pension_contributions=2000000,
-    mortgage_payments=3000000,
-    donations=500000,
-    educational_expenses=2000000,
-    personal_info=personal_info  # Puedes usar el ID de personal_info aquí
-)
-
- #Insertar persona natural
-print(NaturalPersonController.search_natural_person(12345678))
-
-#NaturalPersonController.update_natural_person(rut= 12345678, educational_expenses=206150000000000000000000000000000000)

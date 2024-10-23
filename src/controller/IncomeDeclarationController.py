@@ -3,9 +3,11 @@ sys.path.append("src")
 from TaxCalculator.IncomeDeclaration import PersonalInfo, IncomeDeclaration, NaturalPerson, CalculoException
 import psycopg2
 from psycopg2 import sql
-import SecretConfig
+from Controller import SecretConfig
+
 class NotFound(Exception):
     pass
+
 class IncomeDeclarationController:
 
     @staticmethod
@@ -20,6 +22,15 @@ class IncomeDeclarationController:
         PORT = SecretConfig.PGPORT
         connection = psycopg2.connect(database=DATABASE, user=USER, password=PASSWORD, host=HOST, port=PORT)
         return connection, connection.cursor()
+    @staticmethod
+    def BorrarFilas():
+        
+        sql = "delete from usuarios;"
+        conecction, cursor = IncomeDeclarationController.get_cursor()
+        cursor.execute( sql )
+        sql = "delete from familiares;"
+        cursor.execute( sql )
+        cursor.connection.commit() 
 
     @staticmethod
     def create_table():
@@ -28,13 +39,15 @@ class IncomeDeclarationController:
             with open("sql/crate-income_declaration.sql", "r") as f:
                 sql_script = f.read()
             cursor.execute(sql_script)
-            connection.commit()  # Asegúrate de hacer commit después de la ejecución
+            connection.commit()  
+        except psycopg2.errors.DuplicateTable:
+            pass    
         except Exception as e:
             connection.rollback()
-            print(f"Error creando la tabla: {e}")  # Puedes usar logging en lugar de print
+            print(f"Error creando la tabla: {e}") 
         finally:
-            cursor.close()  # Asegúrate de cerrar el cursor
-            connection.close()  # Y cierra la conexión 
+            cursor.close()  
+            connection.close()  
 
     @staticmethod
     def insert_income_declaration(income_declaration: IncomeDeclaration, rut: int):
@@ -66,9 +79,9 @@ class IncomeDeclarationController:
 
     @staticmethod
     def update_income_declaration(rut: int, total_ingresos_gravados: int,
-                                   total_ingresos_no_gravados: int,
-                                   total_costos_deducibles: int,
-                                   valor_impuesto: int):
+                               total_ingresos_no_gravados: int,
+                               total_costos_deducibles: int,
+                               valor_impuesto: int):
         connection, cursor = IncomeDeclarationController.get_cursor()
         try:
             # Verificar que se proporcione una declaración existente
@@ -76,7 +89,7 @@ class IncomeDeclarationController:
             result = cursor.fetchone()
 
             if not result:
-                print("No se encontró la declaración de ingresos con el RUT proporcionado.")
+                print("No se encontró la declaración de ingresos con el ID proporcionado.")
                 return
 
             # Construir la consulta de actualización
@@ -93,13 +106,14 @@ class IncomeDeclarationController:
                                    total_costos_deducibles, valor_impuesto, rut))
             connection.commit()
             print("Declaración de ingresos actualizada correctamente.")
-
+    
         except Exception as e:
             connection.rollback()
             print(f"Error actualizando declaración de ingresos: {e}")
         finally:
             cursor.close()
-            connection.close()   
+            connection.close()
+ 
 
     @staticmethod
     def delete_income_declaration(rut: int):
@@ -133,25 +147,7 @@ class IncomeDeclarationController:
             cursor.close()
             connection.close()
 
-IncomeDeclarationController.create_table()                              
-personal_info = PersonalInfo(nombre="Juan Perez", id=12345678, ocupacion="Ingeniero", rut=12345678)
-
-# Crear instancia de NaturalPerson
-natural_person = NaturalPerson(
-    laboral_income=50000000,
-    other_income=1000000,
-    withholding_source=5000000,
-    social_security_payments=1000000,
-    pension_contributions=2000000,
-    mortgage_payments=3000000,
-    donations=500000,
-    educational_expenses=2000000,
-    personal_info=personal_info  # Puedes usar el ID de personal_info aquí
-)
+IncomeDeclarationController.update_income_declaration(1000873479, 2000000000000, 400000, 6, 7)
 
 
-# Crear instancia de IncomeDeclaration
-income_declaration = IncomeDeclaration(person=natural_person)
 
-IncomeDeclarationController.insert_income_declaration(income_declaration, natural_person.personal_info.rut)
-#IncomeDeclarationController.update_income_declaration(12345678, 50, 20, 30, 60  )
