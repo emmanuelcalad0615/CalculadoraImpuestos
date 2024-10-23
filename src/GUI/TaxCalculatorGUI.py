@@ -8,6 +8,7 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.image import Image
 from kivy.graphics import Color, RoundedRectangle
+from kivy.uix.popup import Popup
 
 import sys
 sys.path.append("src")
@@ -39,12 +40,49 @@ class MainScreen(Screen):
         
         self.add_widget(contenedor)
 
+    def _update_rect(self, instance, value):
+        self.rect.size = instance.size
+        self.rect.pos = instance.pos
+    
+    def change_screen(self, instance):
+        self.manager.current = "questions_screen"
+
+
+class QuestionsScreen(Screen):
+    def __init__(self, **kwargs):
+        super(QuestionsScreen, self).__init__(**kwargs)
+        contenedor = BoxLayout(orientation="vertical", padding=50, spacing=20)
+        
+        with contenedor.canvas.before:
+            Color(1, 1, 1)
+            self.rect = RoundedRectangle(size=contenedor.size, pos=contenedor.pos)
+            contenedor.bind(size=self._update_rect, pos=self._update_rect)
+
+        instruction_label = Label(text="Please answer the following questions before proceeding:", font_size='20sp', halign="center", color=(0, 0, 0))
+        contenedor.add_widget(instruction_label)
+
+        self.inputs = {}
+
+        fields = ["Name", "ID", "Occupation"]
+        for field in fields:
+            label = Label(text=field, size_hint_y=None, height=40, color=(0, 0, 0, 1), halign="left", valign="middle", font_size='20', bold=True)
+            contenedor.add_widget(label)
+
+            input_field = TextInput(multiline=False, size_hint_y=None, height=40, font_size='20sp', hint_text="Enter your " + field)
+            contenedor.add_widget(input_field)
+            self.inputs[field] = input_field
+
+        next_button = Button(text='Next', size=(200, 50), size_hint_y=None, background_color=(0.37, 0.75, 0.96), background_normal='', color=(1, 1, 1), font_size='20sp', bold=True)
+        next_button.bind(on_press=self.go_to_calculator)
+        contenedor.add_widget(next_button)
+
+        self.add_widget(contenedor)
 
     def _update_rect(self, instance, value):
         self.rect.size = instance.size
         self.rect.pos = instance.pos
 
-    def change_screen(self, instance):
+    def go_to_calculator(self, instance):
         self.manager.current = "calculator_screen"
 
 
@@ -101,14 +139,6 @@ class CalculadoraScreen(Screen):
         contenedor.add_widget(Label(text=""))
         contenedor.add_widget(calculate_button)
 
-        result_label_text = Label(text="Result", bold=True, size_hint_y=None, height=40, color=(0, 0, 0, 1), halign="left", valign="middle", font_size='20sp')
-        contenedor.add_widget(Label(text=""))
-        contenedor.add_widget(result_label_text)
-
-        self.result_label = Label(text="", size_hint_y=None, height=30, color=(0, 0, 0, 1), halign="left", valign="middle", font_size='20sp')
-        contenedor.add_widget(Label(text=""))
-        contenedor.add_widget(self.result_label)
-
         scroll_view.add_widget(contenedor)
         layout_back.add_widget(scroll_view)
         
@@ -146,18 +176,36 @@ class CalculadoraScreen(Screen):
             
             declaration = IncomeDeclaration(person)
             tax_value = declaration.calcular_valor_impuesto()
-            self.result_label.text = f"Total Tax: ${tax_value:,.2f}"
-            print(tax_value)
-            
-            
+
+
+            contenedor = BoxLayout(orientation='vertical', padding=10, spacing=10)
+            result_label = Label(text=f"Total Tax: ${tax_value:,.2f}", font_size='20sp', halign="center", color=(0.37, 0.75, 0.96))
+            close_button = Button(text="Close", size_hint_y=None, background_color=(0.37, 0.75, 0.96), height=50, on_press=lambda x: popup.dismiss())
+
+            contenedor.add_widget(result_label)
+            contenedor.add_widget(close_button)
+
+            popup = Popup(title='Result', content=contenedor, size_hint=(0.8, 0.5), auto_dismiss=False)
+
+            popup.open()
 
         except Exception as el_error:
             print(el_error)
-            self.result_label.text = f"¡ERROR! Incorrect Value Entered: \n {str(el_error)}"
+
+            contenedor = BoxLayout(orientation='vertical', padding=10, spacing=10)
+            error_label = Label(text=f"¡ERROR! Incorrect Value Entered: \n {str(el_error)}", font_size='20sp', halign="center", color=(1, 0, 0))
+            close_button = Button(text="Close", size_hint_y=None, background_color=(0.37, 0.75, 0.96), height=50, on_press=lambda x: popup.dismiss())
+
+            contenedor.add_widget(error_label)
+            contenedor.add_widget(close_button)
+
+            popup = Popup(title='Error', content=contenedor, size_hint=(0.8, 0.5), auto_dismiss=False)
+
+            popup.open()
 
     def go_back(self, instance):
         self.clear_fields()
-        self.manager.current = "main_screen"
+        self.manager.current = "questions_screen"
         
     
     def clear_fields(self):
@@ -169,6 +217,7 @@ class CalculadoraApp(App):
         contenedor = ScreenManager()
 
         contenedor.add_widget(MainScreen(name="main_screen"))
+        contenedor.add_widget(QuestionsScreen(name="questions_screen"))  
         contenedor.add_widget(CalculadoraScreen(name="calculator_screen"))
 
         return contenedor
