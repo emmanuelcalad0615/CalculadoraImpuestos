@@ -1,14 +1,18 @@
 import sys
 sys.path.append("src")
 from TaxCalculator.IncomeDeclaration import PersonalInfo, NaturalPerson, IncomeDeclaration, CalculoException
+from Controller import PersonalInfoController, NaturalPersonController, IncomeDeclarationController
+
 def mostrar_menu():
     print("\n--- Menú de Declaración de Impuestos ---")
     print("1. Ingresar datos del contribuyente")
     print("2. Calcular impuestos")
-    print("3. Salir")
+    print("3. Guardar en base de datos")
+    print("4. Salir")
 
 def main():
     contribuyente = None
+    personal_info = None
 
     while True:
         mostrar_menu()
@@ -69,6 +73,23 @@ def main():
                 print("Error: No se han ingresado datos del contribuyente.")
 
         elif opcion == '3':
+            if contribuyente and personal_info:
+                try:
+                    # Guardar información personal
+                    PersonalInfoController.insert_personal_info(personal_info)
+                    # Guardar persona natural
+                    NaturalPersonController.insert_natural_person(contribuyente, personal_info.id, personal_info.rut)
+                    # Guardar declaración de ingresos
+                    IncomeDeclarationController.insert_income_declaration(declaracion, contribuyente.personal_info.rut)
+
+                    print("Datos guardados en la base de datos con éxito.")
+
+                except Exception as e:
+                    print(f"Error al guardar en la base de datos: {e}")
+            else:
+                print("Error: Debe ingresar datos del contribuyente antes de guardar.")
+
+        elif opcion == '4':
             print("Saliendo del programa...")
             break
 

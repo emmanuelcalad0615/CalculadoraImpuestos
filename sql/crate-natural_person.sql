@@ -9,5 +9,5 @@ create table natural_person (
     donations int null,                  -- donaciones
     educational_expenses int null,       -- gastos de educación
     cedula int,                              -- referencia al `cedula` en `personal_info`
-    foreign key (cedula) references personal_info(cedula)  -- relación con `personal_info`
+    foreign key (cedula) references personal_info(cedula) ON DELETE CASCADE -- relación con `personal_info`
 );
