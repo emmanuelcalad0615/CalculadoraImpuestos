@@ -1,66 +1,110 @@
-# Proyecto Calculadora de Impuestos
+# Tax Calculator Project
 
-## Descripción del Proyecto
-
-Este proyecto es una Calculadora de Impuestos que calcula el monto del impuesto a pagar basado en diversos parámetros de ingresos y gastos. Valida los valores de entrada para asegurar que sean positivos y cumplan con condiciones específicas antes de realizar el cálculo del impuesto.
-
-## Autores
-
+## Made by:
 - Mario Andrade Rojas
--Samuel Villa Carmona
+- Samuel Villa Carmona
 
-## Estructura del Proyecto
-### Carpetas Principales:
-#### src/GUI/
+## Objective 
 
-##### Calculadora_gui.py: 
-Archivo principal de la interfaz gráfica del usuario (GUI). Permite la interacción visual con el usuario para ingresar datos y mostrar resultados.
-
-#### src/Console/
-
-##### Calculadora_Console.py: 
-Archivo encargado de la interacción en consola. Solicita al usuario sus ingresos y gastos y calcula los impuestos basados en los valores introducidos.
-
-#### src/Logi/
-##### Calculadora.py:
- Contiene la lógica principal de cálculo de impuestos, con las fórmulas y reglas necesarias.
+The objective of this project is to develop a tax calculator that calculates the tax amount payable based on various income and expense parameters. The application will provide users an intuitive interface to input their incomes, payments, donations, among others, and it will show the result for the tax value. 
 
 
-#### test/
+## How does it work?
 
-##### Calculadora_tests.py: 
-Archivo que contiene las pruebas unitarias de los cálculos de impuestos. Verifica el correcto funcionamiento de las fórmulas y lógicas definidas.
-##### Casos_Calculadora.py: 
-Incluye diferentes casos de prueba, como casos normales, extraordinarios y de error, para verificar el comportamiento del sistema.
-##### Exceptions.py: 
-Define las excepciones personalizadas utilizadas en el sistema para gestionar errores relacionados con los datos introducidos.
+The system will ask the person to enter some personal data and after that the person has to enter some information to calculate the tax: 
+- Labor incomes
+- Other Incomes, 
+- Withholding sources
+- Social Security Payments
+- Pension Contributions
+- Mortgage Payments 
+- Donations
+- Educational Expenses
 
-
-## Como ejectutar?
-
-### Interfaz de Consola: 
-
--Navega a la carpeta src/Console y ejecuta el archivo Calculadora_Console.py:
- ##### python src/Console/Calculadora_Console.py
-
--Al ejecutar el programa, se te solicitarán tus ingresos y gastos mensuales. Introduce los valores numéricos sin comas, espacios ni caracteres especiales (ej. #$%&+-). El programa validará los datos y, si todo es correcto, calculará el monto del impuesto que deberías pagar.
-
-### Interfaz Grafica: 
-
-La carpeta src/GUI contiene la implementación de la interfaz gráfica del proyecto. El archivo principal es Calculadora_gui.py, donde se encuentran los elementos visuales que permiten al usuario interactuar con la calculadora de una manera más intuitiva y amigable.
-
-Este archivo utiliza bibliotecas gráficas de Kivy para crear la ventana, botones y campos de entrada necesarios para ingresar los datos del usuario (ingresos y gastos), y muestra el resultado del cálculo en pantalla.
-
-#### Desde consola: 
-
-##### Abrir la terminal:
-Presiona Windows + R, escribe cmd, y presiona Enter.
-Esto abrirá la terminal (símbolo del sistema).
-
--En la terminal, usa el comando cd (change directory) para ir a la ubicación de tu archivo Python. Debes ingresar a las carpetas de la siguiente forma: "cd C:\ruta\a\tu\proyecto\CalculadoraImpuestos\src\GUI" ó "cd C:\Users\TuUsuario\Desktop\CalculadoraImpuestos\src\GUI"
-
--Ejecuta el siguiente comando para instalar Kivy (La interfaz del Usuario): pip install kivy
-
--Una vez que estés dentro de la carpeta GUI, ejecuta el archivo Calculadora_gui.py con el siguiente comando: python Calculadora_gui.py
+Then the system will then handle the required calculations and provide the tax value.
 
 
+## Main Folders:
+
+### sql Folder
+This file defines and creates the sql tables, including their relationships, data and types. This project has 3 tables:
+- Income declaration 
+- Natural Person
+- Personal info
+
+### src Folder
+
+##### Console
+File responsible for console interaction. It asks the user for their income and expenses and calculates taxes based on the values ​​entered.
+
+#### Controller
+This folder manages the database operations, handling tasks such as connecting to the database, executing queries, and processing data.
+
+#### GUI
+Core graphical user interface (GUI) file. Allows visual interaction with the user to enter data and display results.
+
+#### TaxCalculator
+Contains the main tax calculation logic, with the necessary formulas and rules.
+
+### tests Folder
+File containing unit tests (normal cases, extraordinary cases, and error cases) for tax calculations. Verifies the correct functioning of the defined formulas and logic.
+
+There are also 3 files that belong to the project:
+- .gitignore
+- README.md 
+- License
+
+## How to Use?
+## 1. Clone the Repository:
+Open your command prompt and run the following command: 
+
+git clone https://github.com/emmanuelcalad0615/CalculadoraImpuestos.git
+
+## 2. Navigate to the Project Directory:
+Change your directory to the CalculadoraImpuestos folder:
+
+    cd path\to\CalculadoraImpuestos
+
+*Example:* If you cloned the repository to C:\Projects, you would run:
+
+    cd C:\Projects\CalculadoraImpuestos
+
+### 3. Create a Virtual Environment
+
+Before installing the required packages, it's recommended to create a virtual environment. Run the following commands:
+
+#### Windows:
+
+    py -m venv .venv
+    .venv\Scripts\activate
+
+#### macOS/Linux:
+
+    python3 -m venv venv
+    source venv/bin/activate
+
+### 4. Install Requirements
+
+Once the virtual environment is activated, install the required packages using the requirements.txt file:
+
+    pip install -r requirements.txt
+
+### 5. Execute the Program
+
+#### Console Execution:
+
+Run the console.py file:
+
+    py src\Console\TaxCalculatorConsole.py
+
+-When you run the program, you will be asked for some questios and the necessary information to calculate the tax value. Enter the numerical values ​​without commas, spaces or special characters (e.g. #$%&+-). The program will validate the data and, if everything is correct, it will calculate the amount of tax you should pay.
+
+#### GUI Execution:
+
+If a graphical user interface (GUI) is available, navigate to the GUI folder and run the TaxCalculatorGUI.py file:
+
+    py src\GUI\TaxCalculatorGUI.py 
+
+This folder contains the implementation of the project's graphical interface. The main file is Calculadora_gui.py, where the visual elements that allow the user to interact with the calculator in a more intuitive and user-friendly way are located.
+
+This file uses Kivy's graphical libraries to create the window, buttons, and input fields needed to enter the user's data (income and expenses), and displays the result of the calculation on the screen
