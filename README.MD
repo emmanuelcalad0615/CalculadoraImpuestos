@@ -107,4 +107,32 @@ If a graphical user interface (GUI) is available, navigate to the GUI folder and
 
 This folder contains the implementation of the project's graphical interface. The main file is Calculadora_gui.py, where the visual elements that allow the user to interact with the calculator in a more intuitive and user-friendly way are located.
 
-This file uses Kivy's graphical libraries to create the window, buttons, and input fields needed to enter the user's data (income and expenses), and displays the result of the calculation on the screen
+This file uses Kivy's graphical libraries to create the window, buttons, and input fields needed to enter the user's data (income and expenses), and displays the result of the calculation on the screen. 
+
+### Data Base 
+The database was created with (https://neon.tech/), in this we created 3 tables:
+- Income declaration
+- Natural person
+- Personal info
+
+#### Use of the Data Base
+Install the necessary library to connect the SQL database, by running in the terminal
+
+    pip install psycopg2 (Already in the pip list of the requeriments.py)
+
+Then fill in this information and save this file as Secret_Config.py
+to be able to run the application.
+
+    PGDATABASE = "ENTER THE NAME OF THE DATABASE"
+    PGUSER = "ENTER THE DATABASE USER"
+    PGPASSWORD = "ENTER THE PASSWORD"
+    PGHOST = "ENTER THE DNS ADDRESS OR IP ADDRESS OF THE SERVER"
+    PGPORT = 5432 
+
+###### DEFAULT IS 5432, BUT IT MAY CHANGE IN YOUR DB
+
+By following these steps you should now have your database correctly connected to your project.
+
+To create and configure the secret_config, first you have to move them to a new file called "secret_config.py" so that we can call it this way in our controller, which is where we performed our previous database connection process.
+
+Then you have to add it to the '''.gitignore''' file, with that, our credentials are completely secure and we are not at risk of data leakage.
