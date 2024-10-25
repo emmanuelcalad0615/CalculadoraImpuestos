@@ -4,17 +4,22 @@ from TaxCalculator.IncomeDeclaration import PersonalInfo, NaturalPerson, IncomeD
 import psycopg2
 from psycopg2 import sql
 from Controller import SecretConfig
+from Controller.PersonalInfoController import PersonalInfoController
+from TaxCalculator.IncomeDeclaration import NaturalPerson
 
 # Custom exception for not found cases
 class NotFound(Exception):
+    """ 
+    Exception raised when a natural person is not found in the database.
+    """
     pass
 
 class NaturalPersonController:
 
     @staticmethod
     def get_cursor():
-        """
-        Creates a connection to the database and returns a cursor for executing instructions.
+        """ 
+        Creates a connection to the database and returns a cursor for executing SQL instructions.
         """
         DATABASE = SecretConfig.PGDATABASE
         USER = SecretConfig.PGUSER
@@ -24,21 +29,26 @@ class NaturalPersonController:
         connection = psycopg2.connect(database=DATABASE, user=USER, password=PASSWORD, host=HOST, port=PORT)
         return connection, connection.cursor()
     
-    @staticmethod
-    def delete_rows():
+    @staticmethod        
+    def clear_tables():
+        """ 
+        Deletes all entries from the 'natural_person' table. 
+        This method is used for resetting the table during development or testing.
         """
-        Deletes all rows from the 'usuarios' and 'familiares' tables.
-        """
-        sql = "DELETE FROM usuarios;"
-        connection, cursor = NaturalPersonController.get_cursor()
-        cursor.execute(sql)
-        sql = "DELETE FROM familiares;"
-        cursor.execute(sql)
-        cursor.connection.commit() 
+        try:
+            sql = "DELETE FROM natural_person;"
+            connection, cursor = NaturalPersonController.get_cursor()
+            cursor.execute(sql)
+            cursor.connection.commit()  
+        except Exception as e:
+            print(f"Error deleting tables: {e}")
+        finally:
+            connection.close()  
+            cursor.close() 
 
     @staticmethod
     def create_table():
-        """
+        """ 
         Creates the 'natural_person' table in the database by reading the SQL script from a file.
         Handles the error if the table already exists.
         """
@@ -49,6 +59,9 @@ class NaturalPersonController:
             cursor.execute(sql_script)
             connection.commit()  
         except psycopg2.errors.DuplicateTable:
+            """ 
+            Ignore if the table already exists.
+            """
             pass    
         except Exception as e:
             connection.rollback()
@@ -58,19 +71,20 @@ class NaturalPersonController:
             connection.close()     
 
     @staticmethod
-    def insert_natural_person(natural_person: NaturalPerson, personal_info_id: int, personal_info_rut: int):
-        """
-        Inserts a natural person into the 'natural_person' table.
+    def insert_natural_person(natural_person: NaturalPerson, personal_info_id: int):
+        """ 
+        Inserts a new natural person into the 'natural_person' table.
+        Accepts a NaturalPerson object and the ID of the related personal information.
         """
         connection, cursor = NaturalPersonController.get_cursor()
         try:
             cursor.execute(
                 "INSERT INTO natural_person (rut, laboral_income, other_income, withholding_source, "
                 "social_security_payments, pension_contributions, mortgage_payments, "
-                "donations, educational_expenses, cedula) "
+                "donations, educational_expenses, ID) "
                 "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s);",
                 (
-                    personal_info_rut,  
+                    natural_person.rut,  
                     natural_person.laboral_income,
                     natural_person.other_income,
                     natural_person.withholding_source,
@@ -95,13 +109,16 @@ class NaturalPersonController:
                                withholding_source: int = None, social_security_payments: int = None,
                                pension_contributions: int = None, mortgage_payments: int = None,
                                donations: int = None, educational_expenses: int = None):
-        """
+        """ 
         Updates an existing natural person in the 'natural_person' table based on the provided RUT.
+        Only updates fields that are provided with new values.
         """
         connection, cursor = NaturalPersonController.get_cursor()
         try:
             # Retrieve the current data of the natural person
-            cursor.execute("SELECT * FROM natural_person WHERE rut = %s;", (rut,))
+            cursor.execute("SELECT laboral_income, other_income, withholding_source, "
+                "social_security_payments, pension_contributions, mortgage_payments, "
+                "donations, educational_expenses FROM natural_person WHERE rut = %s;", (rut,))
             result = cursor.fetchone()
 
             if not result:
@@ -109,18 +126,19 @@ class NaturalPersonController:
 
             # Extract current values
             current_data = {
-                "laboral_income": result[1],
-                "other_income": result[2],
-                "withholding_source": result[3],
-                "social_security_payments": result[4],
-                "pension_contributions": result[5],
-                "mortgage_payments": result[6],
-                "donations": result[7],
-                "educational_expenses": result[8],
+                "laboral_income": result[0],
+                "other_income": result[1],
+                "withholding_source": result[2],
+                "social_security_payments": result[3],
+                "pension_contributions": result[4],
+                "mortgage_payments": result[5],
+                "donations": result[6],
+                "educational_expenses": result[7]
             }
 
             # Update values only if new ones are provided
             updated_data = {
+                "rut": rut,
                 "laboral_income": laboral_income if laboral_income is not None else current_data["laboral_income"],
                 "other_income": other_income if other_income is not None else current_data["other_income"],
                 "withholding_source": withholding_source if withholding_source is not None else current_data["withholding_source"],
@@ -162,8 +180,9 @@ class NaturalPersonController:
 
     @staticmethod
     def delete_natural_person(rut: int):
-        """
+        """ 
         Deletes a natural person from the 'natural_person' table based on the provided RUT.
+        Raises an exception if no record is found for the given RUT.
         """
         connection, cursor = NaturalPersonController.get_cursor()
         try:
@@ -182,17 +201,20 @@ class NaturalPersonController:
 
     @staticmethod
     def search_natural_person(rut: int):
-        """
+        """ 
         Searches for a natural person in the 'natural_person' table based on the provided RUT.
         Returns the found data or raises an exception if no information is found.
         """
         connection, cursor = NaturalPersonController.get_cursor()
         try:
-            cursor.execute("SELECT * FROM natural_person WHERE rut = %s;", (rut,))
+            cursor.execute("SELECT rut, laboral_income, other_income, withholding_source, social_security_payments, pension_contributions, mortgage_payments, donations, educational_expenses, id FROM natural_person WHERE rut = %s;", (rut,))
             result = cursor.fetchone()
             if not result:
                 raise NotFound("No natural person found with the provided RUT.")
-            return result  # Return the found data
+            personal_info = PersonalInfoController.search_personal_info(result[9])
+            natural_person = NaturalPerson(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8], personal_info)
+
+            return natural_person  # Return the found data
         except Exception as e:
             print(f"Error searching for natural person: {e}")
         finally:

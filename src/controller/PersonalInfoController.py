@@ -5,15 +5,23 @@ import psycopg2
 from psycopg2 import sql
 from Controller import SecretConfig
 
-# Custom exception to handle not found cases
 class NotFound(Exception):
+    """ 
+    Exception raised when an item is not found in the database.
+    """
+    pass
+
+class DatabaseError(Exception):
+    """ 
+    Exception raised for general database errors.
+    """
     pass
 
 class PersonalInfoController:
 
     @staticmethod
     def get_cursor():
-        """
+        """ 
         Creates a connection to the database and returns a cursor for executing instructions.
         """
         DATABASE = SecretConfig.PGDATABASE
@@ -26,9 +34,9 @@ class PersonalInfoController:
 
     @staticmethod
     def create_table():
-        """
-        Creates the 'personal_info' table in the database by reading the SQL script from a file.
-        Handles the error if the table already exists.
+        """ 
+        Creates the personal_info table in the database if it doesn't already exist.
+        Reads the SQL script from a file and executes it.
         """
         connection, cursor = PersonalInfoController.get_cursor()
         try:
@@ -36,40 +44,51 @@ class PersonalInfoController:
                 sql_script = f.read()
             cursor.execute(sql_script)
             connection.commit()  
+            print("Table created successfully.")
         except psycopg2.errors.DuplicateTable:
-            # Ignore if the table already exists
-            pass    
+            """ 
+            Ignore if the table already exists.
+            """
+            pass
         except Exception as e:
             connection.rollback()
             print(f"Error creating the table: {e}")  
         finally:
             cursor.close()  
-            connection.close() 
+            connection.close()
 
     @staticmethod        
-    def delete_rows():
+    def clear_tables():
+        """ 
+        Deletes all entries from the personal_info table.
+        Useful for resetting the table during development or testing.
         """
-        Deletes all rows from the 'usuarios' and 'familiares' tables.
-        """
-        sql = "DELETE FROM usuarios;"
-        connection, cursor = PersonalInfoController.get_cursor()
-        cursor.execute(sql)
-        sql = "DELETE FROM familiares;"
-        cursor.execute(sql)
-        cursor.connection.commit()             
+        try:
+            sql = "DELETE FROM personal_info;"
+            connection, cursor = PersonalInfoController.get_cursor()
+            cursor.execute(sql)
+            connection.commit()  
+            print("Tables cleared successfully.")
+        except Exception as e:
+            print(f"Error deleting tables: {e}")
+        finally:
+            connection.close()  
+            cursor.close()
 
     @staticmethod
     def insert_personal_info(personal_info: PersonalInfo):
-        """
-        Inserts personal information into the 'personal_info' table.
+        """ 
+        Inserts a new personal information record into the database.
+        Accepts a PersonalInfo object and inserts its attributes into the table.
         """
         connection, cursor = PersonalInfoController.get_cursor()
         try:
             cursor.execute(
-                "INSERT INTO personal_info (cedula, nombre, ocupacion) VALUES (%s, %s, %s);",
+                "INSERT INTO personal_info (ID, name, ocupation) VALUES (%s, %s, %s);",
                 (personal_info.id, personal_info.nombre, personal_info.ocupacion)
             )
             connection.commit()
+            print("Personal information inserted successfully.")
         except Exception as e:
             connection.rollback()
             print(f"Error inserting personal information: {e}")
@@ -79,43 +98,43 @@ class PersonalInfoController:
 
     @staticmethod
     def update_personal_info(cedula: int, nombre: str = None, ocupacion: str = None):
-        """
-        Updates personal information in the 'personal_info' table based on the provided cedula.
+        """ 
+        Updates the personal information for a specific ID.
+        Accepts new values for name and occupation; only updates those that are not None.
         """
         connection, cursor = PersonalInfoController.get_cursor()
         try:
-            # Retrieve the current data for the person
-            cursor.execute("SELECT * FROM personal_info WHERE cedula = %s;", (cedula,))
+            # Get the current data for the person
+            cursor.execute("SELECT name, ocupation FROM personal_info WHERE ID = %s;", (cedula,))
             result = cursor.fetchone()
 
             if not result:
-                raise NotFound("No personal information found with the provided cedula.")
+                raise NotFound("No personal information found with the provided ID.")
 
             updates = []
             params = []
 
-            # Add name to the query if not None
+            # Add name to the query if it's not None
             if nombre is not None:
-                updates.append("nombre = %s")
+                updates.append("name = %s")
                 params.append(nombre)
 
-            # Add occupation to the query if not None
+            # Add occupation to the query if it's not None
             if ocupacion is not None:
-                updates.append("ocupacion = %s")
+                updates.append("ocupation = %s")
                 params.append(ocupacion)
 
-            # Ensure there's something to update
+            # Make sure there is something to update
             if not updates:
-                print("No changes provided for update.")
                 return
 
             # Build the query
-            query = f"UPDATE personal_info SET {', '.join(updates)} WHERE cedula = %s;"
+            query = f"UPDATE personal_info SET {', '.join(updates)} WHERE ID = %s;"
             params.append(cedula)
 
             cursor.execute(query, params)
             connection.commit()
-            print("Information updated successfully.")
+            print("Personal information updated successfully.")
         except Exception as e:
             connection.rollback()
             print(f"Error updating personal information: {e}")
@@ -125,17 +144,18 @@ class PersonalInfoController:
 
     @staticmethod
     def delete_personal_info(cedula: int):
-        """
-        Deletes personal information from the 'personal_info' table based on the provided cedula.
+        """ 
+        Deletes the personal information record with the specified ID.
+        Raises an exception if no record is found for the given ID.
         """
         connection, cursor = PersonalInfoController.get_cursor()
         try:
             cursor.execute(
-                "DELETE FROM personal_info WHERE cedula = %s;",
+                "DELETE FROM personal_info WHERE ID = %s;",
                 (cedula,)
             )
             if cursor.rowcount == 0:
-                raise NotFound("No personal information found with the provided cedula.")
+                raise NotFound("No personal information found with the provided ID.")
             else:
                 connection.commit()
                 print("Personal information deleted successfully.")
@@ -148,19 +168,21 @@ class PersonalInfoController:
 
     @staticmethod
     def search_personal_info(cedula: int):
-        """
-        Searches for personal information in the 'personal_info' table based on the provided cedula.
-        Returns the found data or raises an exception if no information is found.
+        """ 
+        Searches for personal information by ID and returns the result.
+        Raises an exception if no record is found for the specified ID.
         """
         connection, cursor = PersonalInfoController.get_cursor()
         try:
-            cursor.execute("SELECT * FROM personal_info WHERE cedula = %s;", (cedula,))
+            cursor.execute("SELECT ID, name, ocupation FROM personal_info WHERE ID = %s;", (cedula,))
             result = cursor.fetchone()
             if not result:
-                raise NotFound("No personal information found with the provided cedula.")
-            return result  # Return the found data
+                raise NotFound("No personal information found with the provided ID.")
+            
+            personal_info = (result[0], result[1], result[2])
+            return personal_info 
         except Exception as e:
             print(f"Error searching for personal information: {e}")
         finally:
             cursor.close()
-            connection.close()
+            connection.close()  

@@ -1,9 +1,9 @@
-create table income_declaration (
-    id serial primary key,         -- id único de la declaración de ingresos
-    rut int UNIQUE,                    -- rut de la persona (clave foránea)
-    total_ingresos_gravados bigint,   -- ingresos gravados
-    total_ingresos_no_gravados bigint, -- ingresos no gravados (deducciones)
-    total_costos_deducibles bigint,    -- costos deducibles
-    valor_impuesto bigint,         -- valor del impuesto a pagar
-    foreign key (rut) references natural_person(rut) ON DELETE CASCADE -- relación con `person`
+CREATE TABLE income_declaration (
+    id SERIAL PRIMARY KEY,                        -- unique ID for the income declaration
+    rut INT UNIQUE,                               -- RUT of the person (foreign key)
+    total_taxable_income BIGINT,                 -- taxable income
+    total_non_taxable_income BIGINT,             -- non-taxable income (deductions)
+    total_deductible_costs BIGINT,               -- deductible costs
+    tax_value BIGINT,                            -- tax amount to be paid
+    FOREIGN KEY (rut) REFERENCES natural_person(rut) ON DELETE CASCADE -- relationship with `natural_person`
 );

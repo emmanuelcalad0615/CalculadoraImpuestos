@@ -175,7 +175,7 @@ class CalculadoraScreen(Screen):
             )
             
             declaration = IncomeDeclaration(person)
-            tax_value = declaration.calcular_valor_impuesto()
+            tax_value = declaration.calculate_tax_value()
 
 
             contenedor = BoxLayout(orientation='vertical', padding=10, spacing=10)

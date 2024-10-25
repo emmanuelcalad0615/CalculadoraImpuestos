@@ -5,192 +5,248 @@ from Controller.IncomeDeclarationController import IncomeDeclarationController
 from Controller.PersonalInfoController import PersonalInfoController
 from Controller.NaturalPersonController import NaturalPersonController
 
-
-def mostrar_menu():
-    print("\n--- Menú de Declaración de Impuestos ---")
-    print("1. Ingresar datos del contribuyente")
-    print("2. Calcular impuestos")
-    print("3. Guardar en base de datos")
-    print("4. Actualizar en base de datos")
-    print("5. Eliminar en base de datos")
-    print("6. Salir")
+def show_menu():
+    """ 
+    Function to display the main menu options to the user. 
+    Each option corresponds to a specific action the user can take within the program.
+    """
+    print("\n--- Tax Declaration Menu ---")
+    print("1. Enter taxpayer data")  
+    print("2. Calculate taxes")  
+    print("3. Save to database")  
+    print("4. Update in database")  
+    print("5. Delete from database")  
+    print("6. Search in database")  
+    print("7. Exit")  
 
 def main():
-    natural_person = None
-    personal_info = None
-    declaracion = None
-    PersonalInfoController.create_table()
-    NaturalPersonController.create_table()
-    IncomeDeclarationController.create_table()
+    """ 
+    Main function to control the flow of the tax declaration program. 
+    Initializes necessary variables, creates database tables, and handles user interaction.
+    """
+    natural_person = None  
+    personal_info = None  
+    declaration = None  
+    
+    PersonalInfoController.create_table()  
+    NaturalPersonController.create_table()  
+    IncomeDeclarationController.create_table()  
 
     while True:
-        mostrar_menu()
-        opcion = input("Seleccione una opción: ")
+        show_menu()  
+        option = input("Select an option: ")  
 
-        if opcion == '1':
+        if option == '1':
+            """ 
+            Option to enter taxpayer data. 
+            Prompts the user for personal and financial information to create a NaturalPerson object.
+            """
             try:
-                # Ingresar datos del contribuyente
-                nombre = input("Ingrese el nombre: ")
-                id = int(input("Ingrese el ID: "))
-                ocupacion = input("Ingrese la ocupación: ")
-                rut = int(input("Ingrese el RUT: "))
+                name = input("Enter the name: ")  
+                id = int(input("Enter the ID: "))  
+                occupation = input("Enter the occupation: ")  
+                rut = int(input("Enter the RUT: "))  
                 
-                laboral_income = int(input("Ingrese los ingresos laborales: "))
-                other_income = int(input("Ingrese otros ingresos: "))
-                withholding_source = int(input("Ingrese la retención de fuente: "))
-                social_security_payments = int(input("Ingrese los pagos de seguridad social: "))
-                pension_contributions = int(input("Ingrese los aportes a pensión: "))
-                mortgage_payments = int(input("Ingrese los pagos por crédito hipotecario: "))
-                donations = int(input("Ingrese las donaciones: "))
-                educational_expenses = int(input("Ingrese los gastos de educación: "))
+                labor_income = int(input("Enter labor income: "))  
+                other_income = int(input("Enter other income: "))  
+                withholding_source = int(input("Enter withholding tax: "))  
+                social_security_payments = int(input("Enter social security payments: "))  
+                pension_contributions = int(input("Enter pension contributions: "))  
+                mortgage_payments = int(input("Enter mortgage payments: "))  
+                donations = int(input("Enter donations: "))  
+                educational_expenses = int(input("Enter educational expenses: "))  
                 
-                personal_info = PersonalInfo(nombre, id, ocupacion, rut)
-                
+                personal_info = PersonalInfo(id, name, occupation)  
                 natural_person = NaturalPerson(
-                    laboral_income, other_income, withholding_source,
+                    rut, labor_income, other_income, withholding_source,
                     social_security_payments, pension_contributions,
                     mortgage_payments, donations, educational_expenses,
-                    personal_info
+                    personal_info  
                 )
-                print("Datos del contribuyente ingresados con éxito.")
-
+                
             except ValueError:
-                print("Error: Por favor, ingrese valores numéricos válidos.")
+                """ 
+                Handle case where the user input is not a valid integer. 
+                Inform the user of the error.
+                """
+                print("Error: Please enter valid numeric values.")
             except CalculoException as e:
-                print(f"Error de cálculo: {e}")
+                """ 
+                Handle specific calculation exceptions that may arise. 
+                Display the exception message to the user.
+                """
+                print(f"Error: {e}")
 
-        elif opcion == '2':
+        elif option == '2':
+            """ 
+            Option to calculate taxes based on entered data. 
+            Creates an IncomeDeclaration instance for the natural person and displays results.
+            """
             if natural_person:
                 try:
-                    declaracion = IncomeDeclaration(person=natural_person)
-
-                    # Cálculo del impuesto
-                    total_ingresos_gravados = declaracion.calcular_total_ingresos_gravados()
-                    total_ingresos_no_gravados = declaracion.calcular_total_ingresos_no_gravados()
-                    total_costos_deducibles = declaracion.calcular_total_costos_deducibles()
-                    valor_impuesto = declaracion.calcular_valor_impuesto()
-
-                    # Imprimir resultados
-                    print(f"Total Ingresos Gravados: {total_ingresos_gravados}")
-                    print(f"Total Ingresos No Gravados: {total_ingresos_no_gravados}")
-                    print(f"Total Costos Deducibles: {total_costos_deducibles}")
-                    print(f"Valor Impuesto: {valor_impuesto}")
+                    declaration = IncomeDeclaration(person=natural_person)  
+                    print(declaration)  
 
                 except CalculoException as e:
-                    print(f"Error de cálculo: {e}")
+                    """ 
+                    Handle any exceptions that occur during tax calculations. 
+                    Display the exception message to the user.
+                    """
+                    print(f"{e}")
             else:
-                print("Error: No se han ingresado datos del contribuyente.")
+                """ 
+                Inform the user that no taxpayer data has been entered yet. 
+                This check prevents errors during tax calculation.
+                """
+                print("Error: No taxpayer data has been entered.")
 
-        elif opcion == '3':
-            if natural_person and personal_info and declaracion:
+        elif option == '3':
+            """ 
+            Option to save entered data to the database. 
+            Ensures that all necessary data has been entered before saving.
+            """
+            if natural_person and personal_info and declaration:
                 try:
-
-                    # Guardar información personal
-                    PersonalInfoController.insert_personal_info(personal_info)
-                    # Guardar persona natural
-                    NaturalPersonController.insert_natural_person(natural_person, personal_info.id, personal_info.rut)
-                    # Guardar declaración de ingresos
-                    IncomeDeclarationController.insert_income_declaration(declaracion, natural_person.personal_info.rut)
-
-                    print("Datos guardados en la base de datos con éxito.")
+                    PersonalInfoController.insert_personal_info(personal_info)  
+                    NaturalPersonController.insert_natural_person(natural_person, personal_info.id)  
+                    IncomeDeclarationController.insert_income_declaration(natural_person.rut)  
 
                 except Exception as e:
-                    print(f"Error al guardar en la base de datos: {e}")
+                    """ 
+                    Handle any errors that occur during the save process. 
+                    Display an error message.
+                    """
+                    print(f"Error while saving to the database: {e}")
             else:
-                print("Error: Debe ingresar datos del contribuyente y calcular la hipoteca antes de guardar.")
-        elif opcion == '4':
-            if natural_person and declaracion:
+                """ 
+                Inform the user that they must enter all required data before saving. 
+                Prevents incomplete data from being saved.
+                """
+                print("Error: You must enter taxpayer data and calculate the declaration before saving.")
+        
+        elif option == '4':
+            """ 
+            Option to update taxpayer information in the database. 
+            Allows the user to modify existing records and recalculate declarations.
+            """
+            if natural_person and declaration:
                 try:
-                    cedula = (personal_info.id)
-                    rut = natural_person.personal_info.rut
-                    print(f"Ingresando nuevos datos para el contribuyente con RUT: {rut}")
+                    id_number = (personal_info.id)  
+                    rut = natural_person.rut  
+                    print(f"Entering new data for the taxpayer with RUT: {rut}")  
                     
-                    # Actualizar datos de PersonalInfo
-                    nuevo_nombre = input("Ingrese el nuevo nombre (dejar vacío para no cambiar): ")
-                    nuevo_ocupacion = input("Ingrese la nueva ocupación (dejar vacío para no cambiar): ")
+                    new_name = input("Enter the new name (leave blank to not change): ")  
+                    new_occupation = input("Enter the new occupation (leave blank to not change): ")  
 
                     PersonalInfoController.update_personal_info(
-                        cedula=cedula,
-                        nombre=nuevo_nombre if nuevo_nombre else None,
-                        ocupacion=nuevo_ocupacion if nuevo_ocupacion else None
+                        cedula=id_number,  
+                        nombre=new_name if new_name else None,  
+                        ocupacion=new_occupation if new_occupation else None  
                     )
                     try:
-                        # Actualizar también los datos de NaturalPerson
-                        nuevo_ingreso_laboral = input("Ingrese los nuevos ingresos laborales (dejar vacío para no cambiar): ")
-                        nuevo_ingreso_laboral = int(nuevo_ingreso_laboral) if nuevo_ingreso_laboral else None
+                        new_labor_income = input("Enter the new labor income (leave blank to not change): ")
+                        new_labor_income = int(new_labor_income) if new_labor_income else None  
 
-                        nuevo_otros_ingresos = input("Ingrese los nuevos otros ingresos (dejar vacío para no cambiar): ")
-                        nuevo_otros_ingresos = int(nuevo_otros_ingresos) if nuevo_otros_ingresos else None
+                        new_other_income = input("Enter the new other income (leave blank to not change): ")
+                        new_other_income = int(new_other_income) if new_other_income else None  
 
-                        nueva_retencion = input("Ingrese la nueva retención de fuente (dejar vacío para no cambiar): ")
-                        nueva_retencion = int(nueva_retencion) if nueva_retencion else None
+                        new_withholding = input("Enter the new withholding tax (leave blank to not change): ")
+                        new_withholding = int(new_withholding) if new_withholding else None  
 
-                        nuevos_pagos_seguridad = input("Ingrese los nuevos pagos de seguridad social (dejar vacío para no cambiar): ")
-                        nuevos_pagos_seguridad = int(nuevos_pagos_seguridad) if nuevos_pagos_seguridad else None
+                        new_social_security_payments = input("Enter the new social security payments (leave blank to not change): ")
+                        new_social_security_payments = int(new_social_security_payments) if new_social_security_payments else None  
 
-                        nuevos_aportes_pension = input("Ingrese los nuevos aportes a pensión (dejar vacío para no cambiar): ")
-                        nuevos_aportes_pension = int(nuevos_aportes_pension) if nuevos_aportes_pension else None
+                        new_pension_contributions = input("Enter the new pension contributions (leave blank to not change): ")
+                        new_pension_contributions = int(new_pension_contributions) if new_pension_contributions else None  
 
-                        nuevos_pagos_hipotecarios = input("Ingrese los nuevos pagos por crédito hipotecario (dejar vacío para no cambiar): ")
-                        nuevos_pagos_hipotecarios = int(nuevos_pagos_hipotecarios) if nuevos_pagos_hipotecarios else None
+                        new_mortgage_payments = input("Enter the new mortgage payments (leave blank to not change): ")
+                        new_mortgage_payments = int(new_mortgage_payments) if new_mortgage_payments else None  
 
-                        nuevas_donaciones = input("Ingrese las nuevas donaciones (dejar vacío para no cambiar): ")
-                        nuevas_donaciones = int(nuevas_donaciones) if nuevas_donaciones else None
+                        new_donations = input("Enter the new donations (leave blank to not change): ")
+                        new_donations = int(new_donations) if new_donations else None  
 
-                        nuevos_gastos_educacion = input("Ingrese los nuevos gastos de educación (dejar vacío para no cambiar): ")
-                        nuevos_gastos_educacion = int(nuevos_gastos_educacion) if nuevos_gastos_educacion else None
+                        new_educational_expenses = input("Enter the new educational expenses (leave blank to not change): ")
+                        new_educational_expenses = int(new_educational_expenses) if new_educational_expenses else None  
 
-                    # Actualiza los datos de NaturalPerson utilizando el controlador
-                        
                         NaturalPersonController.update_natural_person(
                             rut=rut,
-                            laboral_income=nuevo_ingreso_laboral,
-                            other_income=nuevo_otros_ingresos,
-                            withholding_source=nueva_retencion,
-                            social_security_payments=nuevos_pagos_seguridad,
-                            pension_contributions=nuevos_aportes_pension,
-                            mortgage_payments=nuevos_pagos_hipotecarios,
-                            donations=nuevas_donaciones,
-                            educational_expenses=nuevos_gastos_educacion
+                            laboral_income=new_labor_income,  
+                            other_income=new_other_income,  
+                            withholding_source=new_withholding,  
+                            social_security_payments=new_social_security_payments,  
+                            pension_contributions=new_pension_contributions,  
+                            mortgage_payments=new_mortgage_payments,  
+                            donations=new_donations,  
+                            educational_expenses=new_educational_expenses  
                         )
                     except Exception as e:
+                        """ 
+                        Handle any errors that occur during the update process. 
+                        Display the error message and exit the function if necessary.
+                        """
                         print(f"Error: {e}")
                         return        
 
-                    # Recalcular la declaración de impuestos
-                    declaracion = IncomeDeclaration(person=natural_person)
-                    total_ingresos_gravados = declaracion.calcular_total_ingresos_gravados()
-                    total_ingresos_no_gravados = declaracion.calcular_total_ingresos_no_gravados()
-                    total_costos_deducibles = declaracion.calcular_total_costos_deducibles()
-                    valor_impuesto = declaracion.calcular_valor_impuesto()
+                    declaration = IncomeDeclaration(person=natural_person)  
+                    total_taxable_income = declaration.calculate_total_taxable_income()  
+                    total_non_taxable_income = declaration.calculate_total_non_taxable_income()  
+                    total_deductible_costs = declaration.calculate_total_deductible_costs()  
+                    tax_value = declaration.calculate_tax_value()  
 
-                    IncomeDeclarationController.update_income_declaration(personal_info.rut, total_ingresos_gravados, total_ingresos_no_gravados,total_costos_deducibles, valor_impuesto)
+                    IncomeDeclarationController.update_income_declaration(natural_person.rut, total_taxable_income, total_non_taxable_income, total_deductible_costs, tax_value)  
 
-                    # Imprimir resultados
-                    print(f"Total Ingresos Gravados: {total_ingresos_gravados}")
-                    print(f"Total Ingresos No Gravados: {total_ingresos_no_gravados}")
-                    print(f"Total Costos Deducibles: {total_costos_deducibles}")
-                    print(f"Valor Impuesto: {valor_impuesto}")
-
-                    print("Datos actualizados correctamente.")
+                    print("Data updated successfully.")  
 
                 except Exception as e:
-                    print(f"Error actualizando datos: {e}")
+                    """ 
+                    Handle any exceptions that occur during the update process. 
+                    Display the error message to the user.
+                    """
+                    print(f"{e}")
             else:
-                print("Error: No se han ingresado datos del contribuyente, ni se ha calculado la declaracion.")
-        elif opcion == '5':
+                """ 
+                Inform the user that no taxpayer data has been entered, nor has the declaration been calculated. 
+                Prevents any update attempts when no data is available.
+                """
+                print("Error: No taxpayer data has been entered, nor has the declaration been calculated.")
+        
+        elif option == '5':
+            """ 
+            Option to delete taxpayer information from the database. 
+            Prompts the user for an ID to delete the corresponding record.
+            """
             try: 
-                id = int(input("Ingrese su cédula: "))
-                PersonalInfoController.delete_personal_info(id) 
+                id = int(input("Enter your ID: "))  
+                PersonalInfoController.delete_personal_info(id)  
             except Exception as e:
-                print(f"Error al eliminar{e}")     
-                      
-        elif opcion == '6':
-            print("Saliendo del programa...")
+                """ 
+                Handle any exceptions that occur during the deletion process. 
+                Display the error message to the user.
+                """
+                print(f"{e}")   
+
+        elif option == '6':
+            """ 
+            Option to search for taxpayer information in the database. 
+            Prompts the user for a RUT and displays the corresponding income declaration.
+            """
+            try:
+                rut = int(input("Enter your RUT: "))  
+                print(IncomeDeclarationController.search_income_declaration(rut))  
+            except Exception as e:
+                """ 
+                Handle any exceptions that occur during the search process. 
+                Display the error message to the user.
+                """
+                print(e)              
+        
+        elif option == '7':
+
+            print("Exiting the program...")
             break
 
         else:
-            print("Opción no válida. Por favor, seleccione una opción del menú.")
+            print("Invalid option. Please select an option from the menu.")
 
 if __name__ == "__main__":
     main()

@@ -4,6 +4,8 @@ from TaxCalculator.IncomeDeclaration import PersonalInfo, IncomeDeclaration, Nat
 import psycopg2
 from psycopg2 import sql
 from Controller import SecretConfig
+from TaxCalculator.IncomeDeclaration import IncomeDeclaration
+from Controller.NaturalPersonController import NaturalPersonController
 
 # Custom exception for not found cases
 class NotFound(Exception):
@@ -24,17 +26,19 @@ class IncomeDeclarationController:
         connection = psycopg2.connect(database=DATABASE, user=USER, password=PASSWORD, host=HOST, port=PORT)
         return connection, connection.cursor()
 
-    @staticmethod
-    def delete_rows():
-        """
-        Deletes all rows from the 'usuarios' and 'familiares' tables.
-        """
-        sql = "DELETE FROM usuarios;"
-        connection, cursor = IncomeDeclarationController.get_cursor()
-        cursor.execute(sql)
-        sql = "DELETE FROM familiares;"
-        cursor.execute(sql)
-        cursor.connection.commit() 
+    @staticmethod        
+    def clear_tables():
+        try:
+            sql = "delete from income_declaration;"
+            conecction, cursor = IncomeDeclarationController.get_cursor()
+            cursor.execute( sql )
+            cursor.connection.commit()  
+        except Exception as e:
+            print(f"Error borrando tablas: {e}")
+            
+        finally:
+            conecction.close()  
+            cursor.close() 
 
     @staticmethod
     def create_table():
@@ -58,20 +62,21 @@ class IncomeDeclarationController:
             connection.close()  
 
     @staticmethod
-    def insert_income_declaration(income_declaration: IncomeDeclaration, rut: int):
+    def insert_income_declaration(rut: int):
         """
         Inserts an income declaration into the 'income_declaration' table.
         """
         connection, cursor = IncomeDeclarationController.get_cursor()
         try:
-            total_taxable_income = income_declaration.calcular_total_ingresos_gravados()
-            total_non_taxable_income = income_declaration.calcular_total_ingresos_no_gravados()
-            total_deductible_costs = income_declaration.calcular_total_costos_deducibles()
-            tax_value = income_declaration.calcular_valor_impuesto()
+            natural_person = NaturalPersonController.search_natural_person(rut)
+            income_declaration = IncomeDeclaration(natural_person)
+            total_taxable_income = income_declaration.total_taxable_income
+            total_non_taxable_income = income_declaration.total_non_taxable_income
+            total_deductible_costs = income_declaration.total_deductible_costs
+            tax_value = income_declaration.tax_value
 
             cursor.execute(
-                "INSERT INTO income_declaration (rut, total_ingresos_gravados, total_ingresos_no_gravados, "
-                "total_costos_deducibles, valor_impuesto) VALUES (%s, %s, %s, %s, %s);",
+                "INSERT INTO income_declaration (rut, total_taxable_income, total_non_taxable_income, total_deductible_costs, tax_value) VALUES (%s, %s, %s, %s, %s);",
                 (
                     rut,
                     total_taxable_income,
@@ -89,17 +94,17 @@ class IncomeDeclarationController:
             connection.close()    
 
     @staticmethod
-    def update_income_declaration(rut: int, total_ingresos_gravados: int,
-                                  total_ingresos_no_gravados: int,
-                                  total_costos_deducibles: int,
-                                  valor_impuesto: int):
+    def update_income_declaration(rut: int, total_taxable_income: int,
+                                  total_non_taxable_income: int,
+                                  total_deductible_costs: int,
+                                  tax_value: int):
         """
         Updates an existing income declaration in the 'income_declaration' table based on the provided RUT.
         """
         connection, cursor = IncomeDeclarationController.get_cursor()
         try:
             # Check that an existing declaration is provided
-            cursor.execute("SELECT * FROM income_declaration WHERE rut = %s;", (rut,))
+            cursor.execute("SELECT total_taxable_income, total_non_taxable_income, total_deductible_costs, tax_value FROM income_declaration WHERE rut = %s;", (rut,))
             result = cursor.fetchone()
 
             if not result:
@@ -109,15 +114,15 @@ class IncomeDeclarationController:
             # Build the update query
             query = """
                 UPDATE income_declaration
-                SET total_ingresos_gravados = %s,
-                    total_ingresos_no_gravados = %s,
-                    total_costos_deducibles = %s,
-                    valor_impuesto = %s
+                SET total_taxable_income = %s,
+                    total_non_taxable_income = %s,
+                    total_deductible_costs = %s,
+                    tax_value = %s
                 WHERE rut = %s;
             """
 
-            cursor.execute(query, (total_ingresos_gravados, total_ingresos_no_gravados,
-                                   total_costos_deducibles, valor_impuesto, rut))
+            cursor.execute(query, (total_taxable_income, total_non_taxable_income,
+                                   total_deductible_costs, tax_value, rut))
             connection.commit()
             print("Income declaration updated successfully.")
     
@@ -157,13 +162,16 @@ class IncomeDeclarationController:
         """
         connection, cursor = IncomeDeclarationController.get_cursor()
         try:
-            cursor.execute("SELECT * FROM income_declaration WHERE rut = %s;", (rut,))
+            cursor.execute("SELECT total_taxable_income, total_non_taxable_income, total_deductible_costs, tax_value FROM income_declaration WHERE rut = %s;", (rut,))
             result = cursor.fetchone()
             if not result:
                 raise NotFound("No income declaration found with the provided RUT.")
-            return result  # Return the found data
+            natural_person = NaturalPersonController.search_natural_person(rut)
+            income_declaration = IncomeDeclaration(natural_person, result[0], result[1], result[2], result[3])
+            return income_declaration
         except Exception as e:
             print(f"Error searching for income declaration: {e}")
         finally:
             cursor.close()
             connection.close()
+

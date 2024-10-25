@@ -42,7 +42,7 @@ class InsufficientIncomeForDeductions(CalculoException):
 
 # Class to store personal information related to the taxpayer
 class PersonalInfo:
-    def __init__(self, nombre: str, id: int, ocupacion: str, rut: int) -> None:
+    def __init__(self, id: int, nombre: str, ocupacion: str) -> None:
         """
         Initializes the personal information of a taxpayer.
 
@@ -54,12 +54,15 @@ class PersonalInfo:
         self.nombre: str = nombre
         self.id: int = id
         self.ocupacion: str = ocupacion
-        self.rut: int = rut
+        
+
+    def __repr__(self) -> str:
+        return f"(Name: {self.nombre}, ID: {self.id}, Ocupacion: {self.ocupacion})"    
 
 
 # Class to represent an individual taxpayer and their financial details
 class NaturalPerson:
-    def __init__(self, laboral_income: int, other_income: int, withholding_source: int, social_security_payments: int, 
+    def __init__(self, rut: int, laboral_income: int, other_income: int, withholding_source: int, social_security_payments: int, 
                  pension_contributions: int, mortgage_payments: int, donations: int, educational_expenses: int, 
                  personal_info: PersonalInfo = None) -> None:
         """
@@ -75,6 +78,8 @@ class NaturalPerson:
         :param educational_expenses: Expenses for educational purposes.
         :param personal_info: An object containing personal details about the taxpayer (optional).
         """
+        if withholding_source < 0:
+            raise WithholdingSourceNegative("Withholding tax cannot be negative.")
         # Check for negative values for any financial information (invalid input)
         if laboral_income < 0 or other_income < 0 or withholding_source < 0 or social_security_payments < 0 or \
            pension_contributions < 0 or mortgage_payments < 0 or donations < 0 or educational_expenses < 0:
@@ -108,15 +113,12 @@ class NaturalPerson:
         if educational_expenses > laboral_income + other_income:
             raise EducationalExpensesExceedIncome("Educational expenses cannot exceed the sum of labor and other income.")
         
-        # Ensure withholding tax is not negative
-        if withholding_source < 0:
-            raise WithholdingSourceNegative("Withholding tax cannot be negative.")
-        
         # Check if the income is sufficient to cover all deductible costs
         if laboral_income < educational_expenses + social_security_payments + pension_contributions + mortgage_payments + donations:
             raise InsufficientIncomeForDeductions("Income is insufficient to cover expenses and deductions.")
         
         # Assign the financial data and personal information to the object's attributes
+        self.rut: int = rut
         self.laboral_income: int = laboral_income
         self.other_income: int = other_income
         self.withholding_source: int = withholding_source
@@ -127,25 +129,44 @@ class NaturalPerson:
         self.educational_expenses: int = educational_expenses
         self.personal_info: PersonalInfo = personal_info
 
+    def __repr__(self) -> str:
+        return f"{self.personal_info} \n\n(RUT: {self.rut}, Laboral Income: {self.laboral_income}, Other Income: {self.other_income}, Withholding Source: {self.withholding_source}, Social Security Payments: {self.social_security_payments})"    
+
 
 # Class to handle income tax declaration and calculations
 class IncomeDeclaration:
-    def __init__(self, person: NaturalPerson) -> None:
+    def __init__(self, person: NaturalPerson, total_taxable_income: int = None, total_non_taxable_income: int = None, tax_value: int = None, total_deductible_costs: int = None) -> None:
         """
         Initializes the IncomeDeclaration class for a specific natural person (taxpayer).
 
         :param person: An object of type NaturalPerson representing the taxpayer.
         """
         self.person: NaturalPerson = person
+        if total_taxable_income is None:
+            self.total_taxable_income = self.calculate_total_taxable_income()
+        else:
+            self.total_taxable_income: int = total_taxable_income
+        if total_taxable_income is None:       
+            self.total_non_taxable_income = self.calculate_total_non_taxable_income()
+        else:
+            self.total_non_taxable_income: int = total_non_taxable_income
+        if tax_value is None:        
+            self.tax_value = self.calculate_tax_value() 
+        else:
+            self.tax_value = tax_value
+        if total_deductible_costs is None:        
+            self.total_deductible_costs = self.calculate_total_deductible_costs() 
+        else:
+            self.total_deductible_costs: int = total_deductible_costs    
 
-    def calcular_total_ingresos_gravados(self):
+    def calculate_total_taxable_income(self):
         """
         Calculates the total taxable income (labor income + other income).
         Returns the sum of all taxable income.
         """
         return self.person.laboral_income + self.person.other_income
 
-    def calcular_total_ingresos_no_gravados(self):
+    def calculate_total_non_taxable_income(self):
         """
         Calculates the total non-taxable income (deductions).
         This includes social security payments, pension contributions,
@@ -154,14 +175,14 @@ class IncomeDeclaration:
         return (self.person.social_security_payments + self.person.pension_contributions + 
                 self.person.mortgage_payments + self.person.donations + self.person.educational_expenses)
 
-    def calcular_total_costos_deducibles(self):
+    def calculate_total_deductible_costs(self):
         """
         Calculates the total deductible costs, which are the same as non-taxable income.
         This will include all deductions as per the tax regulations.
         """
-        return self.calcular_total_ingresos_no_gravados()
+        return self.calculate_total_non_taxable_income()
 
-    def calcular_valor_impuesto(self):
+    def calculate_tax_value(self):
         """
         Calculates the total amount of tax owed.
         If the total taxable income is below 51 million, the user is not required to declare taxes.
@@ -169,14 +190,14 @@ class IncomeDeclaration:
         Returns the calculated tax amount minus the withholding tax.
         """
         # Calculate total taxable income
-        total_taxable_income = self.calcular_total_ingresos_gravados()
+        total_taxable_income = self.calculate_total_taxable_income()
         
         # Check if the total income is below the limit for tax declaration
         if total_taxable_income < 51000000:
             raise BelowLimits("Your income does not exceed 51,000,000. No need to declare taxes.")
         
         # Calculate the deductible costs
-        total_deductible_costs = self.calcular_total_costos_deducibles()
+        total_deductible_costs = self.calculate_total_deductible_costs()
         
         # Calculate the taxable base by subtracting deductions from taxable income
         taxable_base = total_taxable_income - total_deductible_costs
@@ -185,9 +206,10 @@ class IncomeDeclaration:
         tax_amount = taxable_base * 0.35  # Assuming a 35% tax rate
         
         # Raise an error if the tax amount is negative
-        if tax_amount < 0:
-            raise NegativeTaxes("Tax amount cannot be negative.")
         
         # Return the final tax amount after subtracting the withholding tax
         return tax_amount - self.person.withholding_source
+    
+    def __repr__(self) -> str:
+        return f"{self.person} \n\n(Taxable Income = {self.total_taxable_income}, Non Taxable Income: {self.total_non_taxable_income}, Deductible Costs : {self.total_deductible_costs}, Tax Value: {self.tax_value})"
 

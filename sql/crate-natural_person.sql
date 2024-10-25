@@ -8,6 +8,6 @@ create table natural_person (
     mortgage_payments bigint null,         -- pagos por crédito hipotecario
     donations bigint null,                  -- donaciones
     educational_expenses bigint null,       -- gastos de educación
-    cedula bigint,                              -- referencia al `cedula` en `personal_info`
-    foreign key (cedula) references personal_info(cedula) ON DELETE CASCADE -- relación con `personal_info`
+    ID bigint,                              -- referencia al `cedula` en `personal_info`
+    foreign key (ID) references personal_info(ID) ON DELETE CASCADE -- relación con `personal_info`
 );
