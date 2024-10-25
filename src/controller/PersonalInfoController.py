@@ -85,7 +85,7 @@ class PersonalInfoController:
         try:
             cursor.execute(
                 "INSERT INTO personal_info (ID, name, ocupation) VALUES (%s, %s, %s);",
-                (personal_info.id, personal_info.nombre, personal_info.ocupacion)
+                (personal_info.id, personal_info.name, personal_info.ocupation)
             )
             connection.commit()
             print("Personal information inserted successfully.")
@@ -179,7 +179,7 @@ class PersonalInfoController:
             if not result:
                 raise NotFound("No personal information found with the provided ID.")
             
-            personal_info = (result[0], result[1], result[2])
+            personal_info = PersonalInfo(result[0], result[1], result[2])
             return personal_info 
         except Exception as e:
             print(f"Error searching for personal information: {e}")

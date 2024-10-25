@@ -220,3 +220,7 @@ class NaturalPersonController:
         finally:
             cursor.close()
             connection.close()
+
+
+
+

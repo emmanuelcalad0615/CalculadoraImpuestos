@@ -42,7 +42,7 @@ class InsufficientIncomeForDeductions(CalculoException):
 
 # Class to store personal information related to the taxpayer
 class PersonalInfo:
-    def __init__(self, id: int, nombre: str, ocupacion: str) -> None:
+    def __init__(self, id: int, name: str, ocupation: str) -> None:
         """
         Initializes the personal information of a taxpayer.
 
@@ -51,13 +51,13 @@ class PersonalInfo:
         :param ocupacion: Occupation of the taxpayer.
         :param rut: Chilean RUT (Unique Taxpayer Roll) number of the taxpayer.
         """
-        self.nombre: str = nombre
+        self.name: str = name
         self.id: int = id
-        self.ocupacion: str = ocupacion
+        self.ocupation: str = ocupation
         
 
     def __repr__(self) -> str:
-        return f"(Name: {self.nombre}, ID: {self.id}, Ocupacion: {self.ocupacion})"    
+        return f"(Name: {self.name}, ID: {self.id}, Ocupacion: {self.ocupation})"    
 
 
 # Class to represent an individual taxpayer and their financial details
