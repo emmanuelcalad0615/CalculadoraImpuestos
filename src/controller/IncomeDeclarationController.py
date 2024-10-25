@@ -3,9 +3,9 @@ sys.path.append("src")
 from TaxCalculator.IncomeDeclaration import PersonalInfo, IncomeDeclaration, NaturalPerson, CalculoException
 import psycopg2
 from psycopg2 import sql
-from Controller import SecretConfig
+from . import SecretConfig
 from TaxCalculator.IncomeDeclaration import IncomeDeclaration
-from Controller.NaturalPersonController import NaturalPersonController
+from controller.NaturalPersonController import NaturalPersonController
 
 # Custom exception for not found cases
 class NotFound(Exception):

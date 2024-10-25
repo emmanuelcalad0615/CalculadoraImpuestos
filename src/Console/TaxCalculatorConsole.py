@@ -1,9 +1,9 @@
 import sys
 sys.path.append("src")
 from TaxCalculator.IncomeDeclaration import PersonalInfo, NaturalPerson, IncomeDeclaration, CalculoException
-from Controller.IncomeDeclarationController import IncomeDeclarationController
-from Controller.PersonalInfoController import PersonalInfoController
-from Controller.NaturalPersonController import NaturalPersonController
+from controller.IncomeDeclarationController import IncomeDeclarationController
+from controller.PersonalInfoController import PersonalInfoController
+from controller.NaturalPersonController import NaturalPersonController
 
 def show_menu():
     """ 

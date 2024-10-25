@@ -1,9 +1,9 @@
 import sys
 sys.path.append("src")
 import unittest
-from Controller.IncomeDeclarationController import IncomeDeclarationController
-from Controller.NaturalPersonController import NaturalPersonController, NotFound
-from Controller.PersonalInfoController import PersonalInfoController
+from controller.IncomeDeclarationController import IncomeDeclarationController
+from controller.NaturalPersonController import NaturalPersonController, NotFound
+from controller.PersonalInfoController import PersonalInfoController
 from TaxCalculator.IncomeDeclaration import IncomeDeclaration, PersonalInfo, NaturalPerson
 
 

@@ -3,7 +3,7 @@ sys.path.append("src")
 from TaxCalculator.IncomeDeclaration import PersonalInfo, IncomeDeclaration, NaturalPerson
 import psycopg2
 from psycopg2 import sql
-from Controller import SecretConfig
+from . import SecretConfig
 
 class NotFound(Exception):
     """ 
