@@ -1,8 +1,9 @@
 # Tax Calculator Project
 
-## Made by:
-- Mario Andrade Rojas
-- Samuel Villa Carmona
+## Version History
+
+- **Version 1**: Developed by Mario Andrade Rojas and Samuel Villa Carmona
+- **Version 2**: Developed by Emmanuel Calad Correa and Paula Meneses
 
 ## Objective 
 
