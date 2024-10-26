@@ -1,9 +1,9 @@
 import sys
 sys.path.append("src")
 import unittest
-from controller.IncomeDeclarationController import IncomeDeclarationController, NotFoundIncomeDeclaration
-from controller.NaturalPersonController import NaturalPersonController, NotFoundNaturalPerson
-from controller.PersonalInfoController import PersonalInfoController, NotFoundPersonalInfo
+from controller.IncomeDeclarationController import IncomeDeclarationController, NotFoundIncomeDeclaration, InsertionErrorIncomeDeclaration, UpdateErrorIncomeDeclaration, DeletionErrorIncomeDeclaration
+from controller.NaturalPersonController import NaturalPersonController, NotFoundNaturalPerson, InsertionErrorNaturalPerson
+from controller.PersonalInfoController import PersonalInfoController, NotFoundPersonalInfo, InsertionErrorPersonalInfo, DeletionErrorPersonalInfo
 from TaxCalculator.IncomeDeclaration import IncomeDeclaration, PersonalInfo, NaturalPerson
 
 
@@ -68,8 +68,36 @@ class TestPersonalInfoController(unittest.TestCase):
         PersonalInfoController.delete_personal_info(self.info.id)
 
         with self.assertRaises(NotFoundPersonalInfo):
-            PersonalInfoController.search_personal_info(self.info.id)       
+            PersonalInfoController.search_personal_info(self.info.id) 
 
+    def test_insert_personal_info_error(self):
+        """
+        Verifies that an error is raised when trying to insert personal information with invalid data.
+        """
+        
+        invalid_info = PersonalInfo(None, "Daniel", "Engineer")
+
+        with self.assertRaises(InsertionErrorPersonalInfo):
+            PersonalInfoController.insert_personal_info(invalid_info)
+
+    def test_update_personal_info_error(self):
+        """
+        Verifies that an error is raised when trying to update personal information with a non-existing ID.
+        """
+        PersonalInfoController.insert_personal_info(self.info)
+        with self.assertRaises(NotFoundPersonalInfo):
+            PersonalInfoController.update_personal_info(999, nombre="Daniel Updated", ocupacion="Senior Engineer")
+
+    def test_delete_personal_info_error(self):
+        """
+        Verifies that an error is raised when trying to delete personal information that does not exist.
+        """
+    
+        with self.assertRaises(DeletionErrorPersonalInfo):
+            PersonalInfoController.delete_personal_info(999)
+        
+
+    
 
 class TestNaturalPersonController(unittest.TestCase):
     """
@@ -148,6 +176,37 @@ class TestNaturalPersonController(unittest.TestCase):
         with self.assertRaises(NotFoundNaturalPerson):
             NaturalPersonController.search_natural_person(self.natural_person.rut)
 
+    def test_insert_natural_person_error(self):
+        """
+        Verify that an error is thrown when trying to insert a natural person with invalid or duplicate data.
+        """
+        NaturalPersonController.insert_natural_person(self.natural_person, self.info.id)
+        with self.assertRaises(InsertionErrorNaturalPerson):
+            # Intentar insertar con datos duplicados
+            NaturalPersonController.insert_natural_person(self.natural_person, self.info.id) 
+    def test_update_natural_person_error(self):
+        """
+        Verify that an error is thrown when trying to update a natural person with invalid data.        
+        
+        """
+       
+        natural_person = NaturalPerson(1, 6000000000, 20000000, 10000000, 2000000, 3000000, 400000, 5000000, 600000, self.info)
+        NaturalPersonController.insert_natural_person(natural_person, self.info.id)
+
+        
+        with self.assertRaises(NotFoundNaturalPerson):
+            NaturalPersonController.update_natural_person(999999999, laboral_income=800000000)  
+
+    def test_delete_natural_person_error(self):
+        """
+        Verify that an error is thrown when trying to delete a natural person that does not exist.   
+        
+        """
+        with self.assertRaises(NotFoundNaturalPerson):
+            NaturalPersonController.delete_natural_person(999999999)                     
+    
+            
+
 
 class TestIncomeDeclarationController(unittest.TestCase):
     """
@@ -210,6 +269,37 @@ class TestIncomeDeclarationController(unittest.TestCase):
 
         with self.assertRaises(NotFoundIncomeDeclaration):
             IncomeDeclarationController.search_income_declaration(self.natural_person.rut)
+
+    def test_insert_income_declaration_error(self):
+        """
+        Verifies that an error is raised when trying to insert an income declaration with invalid data.
+        """
+        with self.assertRaises(InsertionErrorIncomeDeclaration):
+            IncomeDeclarationController.insert_income_declaration(999)
+
+    def test_update_income_declaration_error(self):
+        """
+        Verifies that an error is raised when trying to update an income declaration with a non-existing RUT.
+        """
+
+        IncomeDeclarationController.insert_income_declaration(self.natural_person.rut)
+
+        
+        with self.assertRaises(NotFoundIncomeDeclaration):
+            IncomeDeclarationController.update_income_declaration(999, 70000, 20000, 1000, 3000)
+
+    def test_delete_income_declaration_error(self):
+        """
+        Verifies that an error is raised when trying to delete an income declaration that does not exist.
+        """
+        
+        with self.assertRaises(NotFoundIncomeDeclaration):
+            IncomeDeclarationController.delete_income_declaration(999)
+
+    
+
+        
+
 
 if __name__ == '__main__':
     unittest.main()

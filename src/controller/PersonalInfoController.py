@@ -2,18 +2,47 @@ import sys
 sys.path.append("src")
 from TaxCalculator.IncomeDeclaration import PersonalInfo, IncomeDeclaration, NaturalPerson
 import psycopg2
-from psycopg2 import sql
 from . import SecretConfig
 
 class NotFoundPersonalInfo(Exception):
     """ 
-    Exception raised when an item is not found in the database.
+    Exception raised when personal information is not found in the database.
     """
     pass
 
-class DatabaseError(Exception):
+class DatabaseErrorPersonalInfo(Exception):
     """ 
-    Exception raised for general database errors.
+    Base exception class for database-related errors.
+    """
+    pass
+
+class TableCreationErrorPersonalInfo(DatabaseErrorPersonalInfo):
+    """ 
+    Exception raised when there is an error creating a table.
+    """
+    pass
+
+class InsertionErrorPersonalInfo(DatabaseErrorPersonalInfo):
+    """ 
+    Exception raised when there is an error inserting personal information.
+    """
+    pass
+
+class UpdateErrorPersonalInfo(DatabaseErrorPersonalInfo):
+    """ 
+    Exception raised when there is an error updating personal information.
+    """
+    pass
+
+class DeletionErrorPersonalInfo(DatabaseErrorPersonalInfo):
+    """ 
+    Exception raised when there is an error deleting personal information.
+    """
+    pass
+
+class SearchErrorPersonalInfo(DatabaseErrorPersonalInfo):
+    """ 
+    Exception raised when there is an error searching for personal information.
     """
     pass
 
@@ -29,8 +58,11 @@ class PersonalInfoController:
         PASSWORD = SecretConfig.PGPASSWORD
         HOST = SecretConfig.PGHOST
         PORT = SecretConfig.PGPORT
-        connection = psycopg2.connect(database=DATABASE, user=USER, password=PASSWORD, host=HOST, port=PORT)
-        return connection, connection.cursor()
+        try:
+            connection = psycopg2.connect(database=DATABASE, user=USER, password=PASSWORD, host=HOST, port=PORT)
+            return connection, connection.cursor()
+        except Exception as e:
+            raise DatabaseErrorPersonalInfo(f"Error connecting to the database: {e}")
 
     @staticmethod
     def create_table():
@@ -52,7 +84,7 @@ class PersonalInfoController:
             pass
         except Exception as e:
             connection.rollback()
-            print(f"Error creating the table: {e}")  
+            raise TableCreationErrorPersonalInfo(f"Error creating the table: {e}")  
         finally:
             cursor.close()  
             connection.close()
@@ -63,17 +95,18 @@ class PersonalInfoController:
         Deletes all entries from the personal_info table.
         Useful for resetting the table during development or testing.
         """
+        connection, cursor = PersonalInfoController.get_cursor()
         try:
             sql = "DELETE FROM personal_info;"
-            connection, cursor = PersonalInfoController.get_cursor()
             cursor.execute(sql)
             connection.commit()  
             print("Tables cleared successfully.")
         except Exception as e:
-            print(f"Error deleting tables: {e}")
+            connection.rollback()
+            raise DatabaseErrorPersonalInfo(f"Error deleting tables: {e}")
         finally:
-            connection.close()  
-            cursor.close()
+            cursor.close()  
+            connection.close()
 
     @staticmethod
     def insert_personal_info(personal_info: PersonalInfo):
@@ -91,7 +124,7 @@ class PersonalInfoController:
             print("Personal information inserted successfully.")
         except Exception as e:
             connection.rollback()
-            print(f"Error inserting personal information: {e}")
+            raise InsertionErrorPersonalInfo(f"Error inserting personal information: {e}")
         finally:
             cursor.close()
             connection.close()    
@@ -135,12 +168,16 @@ class PersonalInfoController:
             cursor.execute(query, params)
             connection.commit()
             print("Personal information updated successfully.")
+        except NotFoundPersonalInfo as e:
+            print(f"Error: {e}")
+            connection.rollback()
+            raise
         except Exception as e:
             connection.rollback()
-            print(f"Error updating personal information: {e}")
+            raise UpdateErrorPersonalInfo(f"Error updating natural person: {e}")
         finally:
             cursor.close()
-            connection.close()
+            connection.close() 
 
     @staticmethod
     def delete_personal_info(cedula: int):
@@ -161,7 +198,7 @@ class PersonalInfoController:
                 print("Personal information deleted successfully.")
         except Exception as e:
             connection.rollback()
-            print(f"Error deleting personal information: {e}")
+            raise DeletionErrorPersonalInfo(f"Error deleting personal information: {e}")
         finally:
             cursor.close()
             connection.close() 
@@ -177,12 +214,16 @@ class PersonalInfoController:
             cursor.execute("SELECT ID, name, ocupation FROM personal_info WHERE ID = %s;", (cedula,))
             result = cursor.fetchone()
             
+            if not result:
+                raise NotFoundPersonalInfo("No personal information found with the provided ID.")
+
             personal_info = PersonalInfo(result[0], result[1], result[2])
             return personal_info 
+        except NotFoundPersonalInfo as e:
+            print(f"Error: {e}")
+            raise
         except Exception as e:
-            print(f"Error searching for personal information: {e}")
-            raise NotFoundPersonalInfo("No personal information found with the provided ID.")
-
+            raise SearchErrorPersonalInfo(f"Error searching for personal information: {e}")
         finally:
             cursor.close()
             connection.close()  

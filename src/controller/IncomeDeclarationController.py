@@ -2,13 +2,56 @@ import sys
 sys.path.append("src")
 from TaxCalculator.IncomeDeclaration import PersonalInfo, IncomeDeclaration, NaturalPerson, CalculoException
 import psycopg2
-from psycopg2 import sql
 from . import SecretConfig
-from TaxCalculator.IncomeDeclaration import IncomeDeclaration
 from controller.NaturalPersonController import NaturalPersonController
 
-# Custom exception for not found cases
-class NotFoundIncomeDeclaration(Exception):
+# Base exception for database errors
+class DatabaseErrorIncomeDeclaration(Exception):
+    """ 
+    Base exception class for database-related errors.
+    """
+    pass
+
+class NotFoundIncomeDeclaration(DatabaseErrorIncomeDeclaration):
+    """ 
+    Exception raised when an income declaration is not found in the database.
+    """
+    pass
+
+class DatabaseConnectionErrorIncomeDeclaration(DatabaseErrorIncomeDeclaration):
+    """ 
+    Exception raised for errors during database connection.
+    """
+    pass
+
+class TableCreationErrorIncomeDeclaration(DatabaseErrorIncomeDeclaration):
+    """ 
+    Exception raised when there is an error creating a table.
+    """
+    pass
+
+class InsertionErrorIncomeDeclaration(DatabaseErrorIncomeDeclaration):
+    """ 
+    Exception raised when there is an error inserting an income declaration.
+    """
+    pass
+
+class UpdateErrorIncomeDeclaration(DatabaseErrorIncomeDeclaration):
+    """ 
+    Exception raised when there is an error updating an income declaration.
+    """
+    pass
+
+class DeletionErrorIncomeDeclaration(DatabaseErrorIncomeDeclaration):
+    """ 
+    Exception raised when there is an error deleting an income declaration.
+    """
+    pass
+
+class SearchErrorIncomeDeclaration(DatabaseErrorIncomeDeclaration):
+    """ 
+    Exception raised when there is an error searching for an income declaration.
+    """
     pass
 
 class IncomeDeclarationController:
@@ -23,22 +66,29 @@ class IncomeDeclarationController:
         PASSWORD = SecretConfig.PGPASSWORD
         HOST = SecretConfig.PGHOST
         PORT = SecretConfig.PGPORT
-        connection = psycopg2.connect(database=DATABASE, user=USER, password=PASSWORD, host=HOST, port=PORT)
-        return connection, connection.cursor()
+        try:
+            connection = psycopg2.connect(database=DATABASE, user=USER, password=PASSWORD, host=HOST, port=PORT)
+            return connection, connection.cursor()
+        except Exception as e:
+            raise DatabaseConnectionErrorIncomeDeclaration(f"Error connecting to the database: {e}")
 
     @staticmethod        
     def clear_tables():
+        """ 
+        Clears all entries from the 'income_declaration' table. 
+        Used for resetting the table during development or testing.
+        """
+        connection, cursor = IncomeDeclarationController.get_cursor()
         try:
-            sql = "delete from income_declaration;"
-            conecction, cursor = IncomeDeclarationController.get_cursor()
-            cursor.execute( sql )
-            cursor.connection.commit()  
+            sql = "DELETE FROM income_declaration;"
+            cursor.execute(sql)
+            connection.commit()  
         except Exception as e:
-            print(f"Error borrando tablas: {e}")
-            
+            connection.rollback()
+            print(f"Error deleting tables: {e}")
         finally:
-            conecction.close()  
-            cursor.close() 
+            cursor.close()  
+            connection.close()
 
     @staticmethod
     def create_table():
@@ -56,10 +106,10 @@ class IncomeDeclarationController:
             pass    
         except Exception as e:
             connection.rollback()
-            print(f"Error creating the table: {e}") 
+            raise TableCreationErrorIncomeDeclaration(f"Error creating the table: {e}")   
         finally:
             cursor.close()  
-            connection.close()  
+            connection.close()
 
     @staticmethod
     def insert_income_declaration(rut: int):
@@ -88,7 +138,7 @@ class IncomeDeclarationController:
             connection.commit()
         except Exception as e:
             connection.rollback()
-            print(f"Error inserting income declaration: {e}")
+            raise InsertionErrorIncomeDeclaration(f"Error inserting income declaration: {e}")
         finally:
             cursor.close()
             connection.close()    
@@ -103,13 +153,11 @@ class IncomeDeclarationController:
         """
         connection, cursor = IncomeDeclarationController.get_cursor()
         try:
-            # Check that an existing declaration is provided
             cursor.execute("SELECT total_taxable_income, total_non_taxable_income, total_deductible_costs, tax_value FROM income_declaration WHERE rut = %s;", (rut,))
             result = cursor.fetchone()
 
             if not result:
-                print("No income declaration found with the provided RUT.")
-                return
+                raise NotFoundIncomeDeclaration("No income declaration found with the provided RUT.")
 
             # Build the update query
             query = """
@@ -126,13 +174,19 @@ class IncomeDeclarationController:
             connection.commit()
             print("Income declaration updated successfully.")
     
+        except CalculoException as e:
+            print(f"Validation error: {e}")
+            connection.rollback()
+        except NotFoundIncomeDeclaration as e:
+            print(f"Error: {e}")
+            connection.rollback()
+            raise
         except Exception as e:
             connection.rollback()
-            print(f"Error updating income declaration: {e}")
+            raise UpdateErrorIncomeDeclaration(f"Error updating natural person: {e}")
         finally:
             cursor.close()
             connection.close()
- 
 
     @staticmethod
     def delete_income_declaration(rut: int):
@@ -147,13 +201,16 @@ class IncomeDeclarationController:
             else:
                 connection.commit()
                 print("Income declaration deleted successfully.")
+        except NotFoundIncomeDeclaration as e:
+            print(f"Error: {e}")
+            raise    
+
         except Exception as e:
             connection.rollback()
-            print(f"Error deleting income declaration: {e}")
-            
+            raise DeletionErrorIncomeDeclaration(f"Error deleting income declaration: {e}")
         finally:
             cursor.close()
-            connection.close() 
+            connection.close()
 
     @staticmethod
     def search_income_declaration(rut: int):
@@ -165,14 +222,18 @@ class IncomeDeclarationController:
         try:
             cursor.execute("SELECT total_taxable_income, total_non_taxable_income, total_deductible_costs, tax_value FROM income_declaration WHERE rut = %s;", (rut,))
             result = cursor.fetchone()
+            if not result:
+                raise NotFoundIncomeDeclaration("No income declaration found with the provided RUT.")
+
             natural_person = NaturalPersonController.search_natural_person(rut)
             income_declaration = IncomeDeclaration(natural_person, result[0], result[1], result[2], result[3])
             return income_declaration
+        except NotFoundIncomeDeclaration as e:
+            print(f"Error: {e}")
+            raise
         except Exception as e:
-            print(f"Error searching for income declaration: {e}")
-            raise NotFoundIncomeDeclaration("No income declaration found with the provided RUT.")
-
+            print(f"Error searching for natural person: {e}")
+            raise SearchErrorIncomeDeclaration("An error occurred while searching for the natural person.")
         finally:
             cursor.close()
             connection.close()
-

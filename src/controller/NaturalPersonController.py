@@ -2,15 +2,55 @@ import sys
 sys.path.append("src")
 from TaxCalculator.IncomeDeclaration import PersonalInfo, NaturalPerson, IncomeDeclaration, CalculoException
 import psycopg2
-from psycopg2 import sql
 from . import SecretConfig
 from controller.PersonalInfoController import PersonalInfoController
-from TaxCalculator.IncomeDeclaration import NaturalPerson
 
-# Custom exception for not found cases
-class NotFoundNaturalPerson(Exception):
+
+class DatabaseErrorNaturalPerson(Exception):
+    """ 
+    Base exception class for database-related errors.
+    """
+    pass
+
+class NotFoundNaturalPerson(DatabaseErrorNaturalPerson):
     """ 
     Exception raised when a natural person is not found in the database.
+    """
+    pass
+
+class DatabaseConnectionErrorNaturalPerson(DatabaseErrorNaturalPerson):
+    """ 
+    Exception raised for errors during database connection.
+    """
+    pass
+
+class TableCreationErrorNaturalPerson(DatabaseErrorNaturalPerson):
+    """ 
+    Exception raised when there is an error creating a table.
+    """
+    pass
+
+class InsertionErrorNaturalPerson(DatabaseErrorNaturalPerson):
+    """ 
+    Exception raised when there is an error inserting a natural person.
+    """
+    pass
+
+class UpdateErrorNaturalPerson(DatabaseErrorNaturalPerson):
+    """ 
+    Exception raised when there is an error updating a natural person.
+    """
+    pass
+
+class DeletionErrorNaturalPerson(DatabaseErrorNaturalPerson):
+    """ 
+    Exception raised when there is an error deleting a natural person.
+    """
+    pass
+
+class SearchErrorNaturalPerson(DatabaseErrorNaturalPerson):
+    """ 
+    Exception raised when there is an error searching for a natural person.
     """
     pass
 
@@ -26,9 +66,12 @@ class NaturalPersonController:
         PASSWORD = SecretConfig.PGPASSWORD
         HOST = SecretConfig.PGHOST
         PORT = SecretConfig.PGPORT
-        connection = psycopg2.connect(database=DATABASE, user=USER, password=PASSWORD, host=HOST, port=PORT)
-        return connection, connection.cursor()
-    
+        try:
+            connection = psycopg2.connect(database=DATABASE, user=USER, password=PASSWORD, host=HOST, port=PORT)
+            return connection, connection.cursor()
+        except Exception as e:
+            raise DatabaseConnectionErrorNaturalPerson(f"Error connecting to the database: {e}")
+
     @staticmethod        
     def clear_tables():
         """ 
@@ -39,12 +82,13 @@ class NaturalPersonController:
             sql = "DELETE FROM natural_person;"
             connection, cursor = NaturalPersonController.get_cursor()
             cursor.execute(sql)
-            cursor.connection.commit()  
+            connection.commit()  
         except Exception as e:
+            connection.rollback()
             print(f"Error deleting tables: {e}")
         finally:
-            connection.close()  
-            cursor.close() 
+            cursor.close()  
+            connection.close() 
 
     @staticmethod
     def create_table():
@@ -59,13 +103,11 @@ class NaturalPersonController:
             cursor.execute(sql_script)
             connection.commit()  
         except psycopg2.errors.DuplicateTable:
-            """ 
-            Ignore if the table already exists.
-            """
+            # Ignore if the table already exists.
             pass    
         except Exception as e:
             connection.rollback()
-            print(f"Error creating the table: {e}")  
+            raise TableCreationErrorNaturalPerson(f"Error creating the table: {e}")  
         finally:
             cursor.close()  
             connection.close()     
@@ -99,7 +141,7 @@ class NaturalPersonController:
             connection.commit()
         except Exception as e:
             connection.rollback()
-            print(f"Error inserting natural person: {e}")
+            raise InsertionErrorNaturalPerson(f"Error inserting natural person: {e}")
         finally:
             cursor.close()
             connection.close() 
@@ -150,7 +192,7 @@ class NaturalPersonController:
             }
 
             # Validate the updated data
-            NaturalPerson(**updated_data)  # This will raise exceptions if there are validation errors
+            NaturalPerson(**updated_data)  
 
             # Build the update query
             updates = []
@@ -171,9 +213,13 @@ class NaturalPersonController:
         except CalculoException as e:
             print(f"Validation error: {e}")
             connection.rollback()
+        except NotFoundNaturalPerson as e:
+            print(f"Error: {e}")
+            connection.rollback()
+            raise
         except Exception as e:
             connection.rollback()
-            print(f"Error updating natural person: {e}")
+            raise UpdateErrorNaturalPerson(f"Error updating natural person: {e}")
         finally:
             cursor.close()
             connection.close() 
@@ -192,9 +238,13 @@ class NaturalPersonController:
             else:
                 connection.commit()
                 print("Natural person deleted successfully.")
+        except NotFoundNaturalPerson as e:
+            print(f"Error: {e}")
+            connection.rollback()
+            raise
         except Exception as e:
             connection.rollback()
-            print(f"Error deleting natural person: {e}")
+            raise DeletionErrorNaturalPerson(f"Error deleting natural person: {e}")
         finally:
             cursor.close()
             connection.close()     
@@ -210,17 +260,19 @@ class NaturalPersonController:
             cursor.execute("SELECT rut, laboral_income, other_income, withholding_source, social_security_payments, pension_contributions, mortgage_payments, donations, educational_expenses, id FROM natural_person WHERE rut = %s;", (rut,))
             result = cursor.fetchone()
             
+            if not result:
+                raise NotFoundNaturalPerson("No natural person found with the provided RUT.")
+
             personal_info = PersonalInfoController.search_personal_info(result[9])
             natural_person = NaturalPerson(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8], personal_info)
 
             return natural_person  # Return the found data
+        except NotFoundNaturalPerson as e:
+            print(f"Error: {e}")
+            raise
         except Exception as e:
             print(f"Error searching for natural person: {e}")
-            raise NotFoundNaturalPerson("No natural person found with the provided RUT.")
+            raise SearchErrorNaturalPerson("An error occurred while searching for the natural person.")
         finally:
             cursor.close()
             connection.close()
-
-
-
-
