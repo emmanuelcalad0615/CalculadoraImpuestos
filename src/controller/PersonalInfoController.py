@@ -5,7 +5,7 @@ import psycopg2
 from psycopg2 import sql
 from . import SecretConfig
 
-class NotFound(Exception):
+class NotFoundPersonalInfo(Exception):
     """ 
     Exception raised when an item is not found in the database.
     """
@@ -109,7 +109,7 @@ class PersonalInfoController:
             result = cursor.fetchone()
 
             if not result:
-                raise NotFound("No personal information found with the provided ID.")
+                raise NotFoundPersonalInfo("No personal information found with the provided ID.")
 
             updates = []
             params = []
@@ -155,7 +155,7 @@ class PersonalInfoController:
                 (cedula,)
             )
             if cursor.rowcount == 0:
-                raise NotFound("No personal information found with the provided ID.")
+                raise NotFoundPersonalInfo("No personal information found with the provided ID.")
             else:
                 connection.commit()
                 print("Personal information deleted successfully.")
@@ -176,13 +176,13 @@ class PersonalInfoController:
         try:
             cursor.execute("SELECT ID, name, ocupation FROM personal_info WHERE ID = %s;", (cedula,))
             result = cursor.fetchone()
-            if not result:
-                raise NotFound("No personal information found with the provided ID.")
             
             personal_info = PersonalInfo(result[0], result[1], result[2])
             return personal_info 
         except Exception as e:
             print(f"Error searching for personal information: {e}")
+            raise NotFoundPersonalInfo("No personal information found with the provided ID.")
+
         finally:
             cursor.close()
             connection.close()  

@@ -8,7 +8,7 @@ from TaxCalculator.IncomeDeclaration import IncomeDeclaration
 from controller.NaturalPersonController import NaturalPersonController
 
 # Custom exception for not found cases
-class NotFound(Exception):
+class NotFoundIncomeDeclaration(Exception):
     pass
 
 class IncomeDeclarationController:
@@ -143,13 +143,14 @@ class IncomeDeclarationController:
         try:
             cursor.execute("DELETE FROM income_declaration WHERE rut = %s;", (rut,))
             if cursor.rowcount == 0:
-                raise NotFound("No income declaration found with the provided RUT.")
+                raise NotFoundIncomeDeclaration("No income declaration found with the provided RUT.")
             else:
                 connection.commit()
                 print("Income declaration deleted successfully.")
         except Exception as e:
             connection.rollback()
             print(f"Error deleting income declaration: {e}")
+            
         finally:
             cursor.close()
             connection.close() 
@@ -164,13 +165,13 @@ class IncomeDeclarationController:
         try:
             cursor.execute("SELECT total_taxable_income, total_non_taxable_income, total_deductible_costs, tax_value FROM income_declaration WHERE rut = %s;", (rut,))
             result = cursor.fetchone()
-            if not result:
-                raise NotFound("No income declaration found with the provided RUT.")
             natural_person = NaturalPersonController.search_natural_person(rut)
             income_declaration = IncomeDeclaration(natural_person, result[0], result[1], result[2], result[3])
             return income_declaration
         except Exception as e:
             print(f"Error searching for income declaration: {e}")
+            raise NotFoundIncomeDeclaration("No income declaration found with the provided RUT.")
+
         finally:
             cursor.close()
             connection.close()

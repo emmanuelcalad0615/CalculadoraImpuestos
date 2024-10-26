@@ -1,9 +1,9 @@
 import sys
 sys.path.append("src")
 import unittest
-from controller.IncomeDeclarationController import IncomeDeclarationController
-from controller.NaturalPersonController import NaturalPersonController, NotFound
-from controller.PersonalInfoController import PersonalInfoController
+from controller.IncomeDeclarationController import IncomeDeclarationController, NotFoundIncomeDeclaration
+from controller.NaturalPersonController import NaturalPersonController, NotFoundNaturalPerson
+from controller.PersonalInfoController import PersonalInfoController, NotFoundPersonalInfo
 from TaxCalculator.IncomeDeclaration import IncomeDeclaration, PersonalInfo, NaturalPerson
 
 
@@ -56,7 +56,19 @@ class TestPersonalInfoController(unittest.TestCase):
         found_info = PersonalInfoController.search_personal_info(self.info.id)
         self.assertEqual(found_info.id, self.info.id)
         self.assertEqual(found_info.name, self.info.name)
-        self.assertEqual(found_info.ocupation, self.info.ocupation)    
+        self.assertEqual(found_info.ocupation, self.info.ocupation) 
+
+    def test_delete_personal_info(self):
+        """
+        Verifies the functionality of deleting personal information.
+        A PersonalInfo object is inserted and then deleted.
+        An attempt to search for the deleted personal information should raise a NotFound exception.
+        """
+        PersonalInfoController.insert_personal_info(self.info)
+        PersonalInfoController.delete_personal_info(self.info.id)
+
+        with self.assertRaises(NotFoundPersonalInfo):
+            PersonalInfoController.search_personal_info(self.info.id)       
 
 
 class TestNaturalPersonController(unittest.TestCase):
@@ -123,18 +135,18 @@ class TestNaturalPersonController(unittest.TestCase):
         self.assertEqual(found_natural_person.educational_expenses, self.natural_person.educational_expenses)
     
 
-    """def test_delete_natural_person(self):
+    def test_delete_natural_person(self):
         
-        Verifies the functionality of deleting a natural person.
+        """Verifies the functionality of deleting a natural person.
         A natural person is inserted and then deleted.
-        An attempt to search for the deleted natural person should raise a NotFound exception.
+        An attempt to search for the deleted natural person should raise a NotFound exception."""
         
         NaturalPersonController.insert_natural_person(self.natural_person, self.info.id)
         
         NaturalPersonController.delete_natural_person(self.natural_person.rut)
 
-        with self.assertRaises(NotFound):
-            NaturalPersonController.search_natural_person(self.natural_person.rut)"""
+        with self.assertRaises(NotFoundNaturalPerson):
+            NaturalPersonController.search_natural_person(self.natural_person.rut)
 
 
 class TestIncomeDeclarationController(unittest.TestCase):
@@ -186,18 +198,18 @@ class TestIncomeDeclarationController(unittest.TestCase):
         found_declaration = IncomeDeclarationController.search_income_declaration(self.natural_person.rut)
         self.assertEqual(found_declaration.total_taxable_income, updated_taxable_income)
 
-    """def test_delete_income_declaration(self):
+    def test_delete_income_declaration(self):
         
-        Verifies the functionality of deleting an income declaration.
+        """Verifies the functionality of deleting an income declaration.
         An income declaration is inserted and then deleted.
-        An attempt to search for the deleted declaration should raise a NotFound exception.
+        An attempt to search for the deleted declaration should raise a NotFound exception."""
         
         IncomeDeclarationController.insert_income_declaration(self.natural_person.rut)
 
         IncomeDeclarationController.delete_income_declaration(self.natural_person.rut)
 
-        with self.assertRaises(NotFound):
-            IncomeDeclarationController.search_income_declaration(self.natural_person.rut)"""
+        with self.assertRaises(NotFoundIncomeDeclaration):
+            IncomeDeclarationController.search_income_declaration(self.natural_person.rut)
 
 if __name__ == '__main__':
     unittest.main()

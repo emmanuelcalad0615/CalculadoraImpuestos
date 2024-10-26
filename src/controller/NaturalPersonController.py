@@ -8,7 +8,7 @@ from controller.PersonalInfoController import PersonalInfoController
 from TaxCalculator.IncomeDeclaration import NaturalPerson
 
 # Custom exception for not found cases
-class NotFound(Exception):
+class NotFoundNaturalPerson(Exception):
     """ 
     Exception raised when a natural person is not found in the database.
     """
@@ -122,7 +122,7 @@ class NaturalPersonController:
             result = cursor.fetchone()
 
             if not result:
-                raise NotFound("No natural person found with the provided RUT.")
+                raise NotFoundNaturalPerson("No natural person found with the provided RUT.")
 
             # Extract current values
             current_data = {
@@ -188,7 +188,7 @@ class NaturalPersonController:
         try:
             cursor.execute("DELETE FROM natural_person WHERE rut = %s;", (rut,))
             if cursor.rowcount == 0:
-                raise NotFound("No natural person found with the provided RUT.")
+                raise NotFoundNaturalPerson("No natural person found with the provided RUT.")
             else:
                 connection.commit()
                 print("Natural person deleted successfully.")
@@ -209,14 +209,14 @@ class NaturalPersonController:
         try:
             cursor.execute("SELECT rut, laboral_income, other_income, withholding_source, social_security_payments, pension_contributions, mortgage_payments, donations, educational_expenses, id FROM natural_person WHERE rut = %s;", (rut,))
             result = cursor.fetchone()
-            if not result:
-                raise NotFound("No natural person found with the provided RUT.")
+            
             personal_info = PersonalInfoController.search_personal_info(result[9])
             natural_person = NaturalPerson(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8], personal_info)
 
             return natural_person  # Return the found data
         except Exception as e:
             print(f"Error searching for natural person: {e}")
+            raise NotFoundNaturalPerson("No natural person found with the provided RUT.")
         finally:
             cursor.close()
             connection.close()
