@@ -70,7 +70,12 @@ Change your directory to the CalculadoraImpuestos folder:
 
     cd C:\Projects\CalculadoraImpuestos
 
-### 3. Create a Virtual Environment
+## 3. Excute command run command to switch to EmmanuelCalad branch
+
+    git checkout EmmanuelCalad
+
+
+### 4. Create a Virtual Environment
 
 Before installing the required packages, it's recommended to create a virtual environment. Run the following commands:
 
@@ -84,13 +89,13 @@ Before installing the required packages, it's recommended to create a virtual en
     python3 -m venv venv
     source venv/bin/activate
 
-### 4. Install Requirements
+### 5. Install Requirements
 
 Once the virtual environment is activated, install the required packages using the requirements.txt file:
 
     pip install -r requirements.txt
 
-### 5. Execute the Program
+### 6. Execute the Program
 
 #### Console Execution:
 
