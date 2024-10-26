@@ -70,7 +70,7 @@ Change your directory to the CalculadoraImpuestos folder:
 
     cd C:\Projects\CalculadoraImpuestos
 
-## 3. Excute command run command to switch to EmmanuelCalad branch
+## 3. Run command to switch to EmmanuelCalad branch
 
     git checkout EmmanuelCalad
 
